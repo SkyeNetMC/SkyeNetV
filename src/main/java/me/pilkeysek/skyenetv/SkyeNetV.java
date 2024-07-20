@@ -1,0 +1,39 @@
+package me.pilkeysek.skyenetv;
+
+import com.google.inject.Inject;
+import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.plugin.Plugin;
+import me.pilkeysek.skyenetv.commands.DiscordCommand;
+import me.pilkeysek.skyenetv.commands.LobbyCommand;
+import me.pilkeysek.skyenetv.commands.SudoCommand;
+import org.slf4j.Logger;
+import com.velocitypowered.api.proxy.ProxyServer;
+
+@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "0.1.0-SNAPSHOT",
+        url = "skye.host", description = "Utilities for SkyeNet Velocity ProxyServer (smth like that)", authors = {"PilkeySEK"})
+public class SkyeNetV {
+
+    private final ProxyServer server;
+    private final Logger logger;
+
+    @Inject
+    public SkyeNetV(ProxyServer server, Logger logger) {
+        this.server = server;
+        this.logger = logger;
+
+        logger.info("SkyeNetV initialized!");
+    }
+    @Subscribe
+    public void onProxyInitialization(ProxyInitializeEvent event) {
+        // Do some operation demanding access to the Velocity API here.
+        // For instance, we could register an event:
+        CommandManager commandManager = server.getCommandManager();
+        // CommandMeta commandMeta = commandManager.metaBuilder("discord").plugin(this).build();
+        // DiscordCommand command = new DiscordCommand();
+        commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand());
+        commandManager.register(commandManager.metaBuilder("lobby").aliases("l", "hub").plugin(this).build(), new LobbyCommand(server));
+        commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
+    }
+}
