@@ -27,11 +27,7 @@ public class SkyeNetV {
     }
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        // Do some operation demanding access to the Velocity API here.
-        // For instance, we could register an event:
         CommandManager commandManager = server.getCommandManager();
-        // CommandMeta commandMeta = commandManager.metaBuilder("discord").plugin(this).build();
-        // DiscordCommand command = new DiscordCommand();
         commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand());
         commandManager.register(commandManager.metaBuilder("lobby").aliases("l", "hub").plugin(this).build(), new LobbyCommand(server));
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
