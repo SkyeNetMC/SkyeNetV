@@ -5,6 +5,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
+import me.pilkeysek.skyenetv.commands.BrigadierSudoCommand;
 import me.pilkeysek.skyenetv.commands.DiscordCommand;
 import me.pilkeysek.skyenetv.commands.LobbyCommand;
 import me.pilkeysek.skyenetv.commands.SudoCommand;
@@ -31,5 +32,6 @@ public class SkyeNetV {
         commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand());
         commandManager.register(commandManager.metaBuilder("lobby").aliases("l", "hub").plugin(this).build(), new LobbyCommand(server));
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
+        commandManager.register(commandManager.metaBuilder("vsudo").aliases("velocitysudo", "proxysudo", "psudo").plugin(this).build(), BrigadierSudoCommand.createBrigadierCommand(server));
     }
 }
