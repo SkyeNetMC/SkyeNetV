@@ -1,0 +1,31 @@
+{
+  "header": "<gradient:gold:yellow>SkyeNet Rules</gradient>",
+  "footer": "<gray>Thank you for following our rules!</gray>",
+  "rules": [
+    {
+      "id": 1,
+      "title": "<red>No Hacking</red>",
+      "description": "<gray>Using any modified clients, cheats or unfair advantages is strictly prohibited.</gray>"
+    },
+    {
+      "id": 2,
+      "title": "<red>Respect All Players</red>",
+      "description": "<gray>Be respectful to everyone. Harassment, discrimination, and hate speech will not be tolerated.</gray>"
+    },
+    {
+      "id": 3,
+      "title": "<red>No Spamming</red>",
+      "description": "<gray>Excessive messages, caps, or flooding chat is not allowed.</gray>"
+    },
+    {
+      "id": 4,
+      "title": "<red>No Advertising</red>",
+      "description": "<gray>Do not advertise other servers or unrelated content.</gray>"
+    },
+    {
+      "id": 5,
+      "title": "<red>Use Common Sense</red>",
+      "description": "<gray>If something seems like it would break the rules, it probably does.</gray>"
+    }
+  ]
+}

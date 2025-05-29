@@ -1,0 +1,10 @@
+{
+    "id": "skyenetv",
+    "name": "SkyeNet Velocity Plugin",
+    "version": "1.0.0",
+    "description": "Utilities for SkyeNet Velocity ProxyServer",
+    "url": "https://skyenet.co.in",
+    "authors": ["PilkeySEK"],
+    "dependencies": [],
+    "main": "me.pilkeysek.skyenetv.SkyeNetV"
+}
