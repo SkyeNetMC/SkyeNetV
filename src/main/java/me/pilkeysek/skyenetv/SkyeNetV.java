@@ -11,10 +11,12 @@ import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import me.pilkeysek.skyenetv.config.RulesConfig;
 import me.pilkeysek.skyenetv.discord.DiscordManager;
 import me.pilkeysek.skyenetv.discord.DiscordListener;
 import me.pilkeysek.skyenetv.commands.DiscordCommand;
 import me.pilkeysek.skyenetv.commands.LobbyCommand;
+import me.pilkeysek.skyenetv.commands.RulesCommand;
 import me.pilkeysek.skyenetv.commands.SudoCommand;
 import org.slf4j.Logger;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -33,6 +35,7 @@ public class SkyeNetV {
     private DiscordManager discordManager;
     private final Path dataDirectory;
     private Properties config;
+    private RulesConfig rulesConfig;
 
     @Inject
     public SkyeNetV(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
@@ -71,6 +74,9 @@ public class SkyeNetV {
         } catch (IOException e) {
             logger.error("Failed to load config file", e);
         }
+        
+        // Initialize rules config
+        rulesConfig = new RulesConfig(dataDirectory, logger);
     }
 
     @Subscribe
@@ -79,6 +85,7 @@ public class SkyeNetV {
         commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand());
         commandManager.register(commandManager.metaBuilder("lobby").aliases("l", "hub").plugin(this).build(), new LobbyCommand(server));
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
+        commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
 
         // Initialize Discord bot
         String token = config.getProperty("discord.token");
@@ -142,5 +149,9 @@ public class SkyeNetV {
 
     public Logger getLogger() {
         return logger;
+    }
+    
+    public RulesConfig getRulesConfig() {
+        return rulesConfig;
     }
 }

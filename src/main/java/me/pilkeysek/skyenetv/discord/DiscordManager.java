@@ -107,4 +107,8 @@ public class DiscordManager {
     public JDA getJda() {
         return jda;
     }
+    
+    public TextChannel getChatChannel() {
+        return chatChannel;
+    }
 }
