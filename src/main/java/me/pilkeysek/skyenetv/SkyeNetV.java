@@ -5,6 +5,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
@@ -12,6 +13,7 @@ import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import me.pilkeysek.skyenetv.config.RulesConfig;
+import me.pilkeysek.skyenetv.config.DiscordConfig;
 import me.pilkeysek.skyenetv.discord.DiscordManager;
 import me.pilkeysek.skyenetv.discord.DiscordListener;
 import me.pilkeysek.skyenetv.commands.DiscordCommand;
@@ -23,10 +25,7 @@ import me.pilkeysek.skyenetv.modules.ChatFilterModule;
 import org.slf4j.Logger;
 import com.velocitypowered.api.proxy.ProxyServer;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Properties;
 
 @Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "2.2",
         url = "skye.host", description = "Utilities for SkyeNet Velocity ProxyServer (smth like that)", authors = {"PilkeySEK"})
@@ -37,7 +36,7 @@ public class SkyeNetV {
     private DiscordManager discordManager;
     private ChatFilterModule chatFilterModule;
     private final Path dataDirectory;
-    private Properties config;
+    private DiscordConfig discordConfig;
     private RulesConfig rulesConfig;
 
     @Inject
@@ -51,46 +50,17 @@ public class SkyeNetV {
             dataDirectory.toFile().mkdirs();
         }
 
-        // Load or create config
-        loadConfig();
+        // Initialize configurations
+        discordConfig = new DiscordConfig(dataDirectory, logger);
+        rulesConfig = new RulesConfig(dataDirectory, logger);
 
         logger.info("SkyeNetV initialized!");
-    }
-
-    private void loadConfig() {
-        config = new Properties();
-        File configFile = dataDirectory.resolve("config.properties").toFile();
-
-        if (!configFile.exists()) {
-            try {
-                configFile.createNewFile();
-                config.setProperty("discord.token", "YOUR_BOT_TOKEN_HERE");
-                config.setProperty("discord.channel", "YOUR_CHANNEL_ID_HERE");
-                config.setProperty("discord.show_prefixes", "true");
-                config.setProperty("discord.filter_messages", "true");
-                config.setProperty("discord.show_filtered_hover", "true");
-                config.setProperty("discord.enable_join_leave", "true");
-                config.setProperty("discord.enable_server_switch", "true");
-                config.store(java.nio.file.Files.newOutputStream(configFile.toPath()), "SkyeNetV Configuration");
-            } catch (IOException e) {
-                logger.error("Failed to create config file", e);
-            }
-        }
-
-        try {
-            config.load(java.nio.file.Files.newInputStream(configFile.toPath()));
-        } catch (IOException e) {
-            logger.error("Failed to load config file", e);
-        }
-        
-        // Initialize rules config
-        rulesConfig = new RulesConfig(dataDirectory, logger);
     }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         CommandManager commandManager = server.getCommandManager();
-        commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand());
+        commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand(this));
         commandManager.register(commandManager.metaBuilder("lobby").aliases("l", "hub").plugin(this).build(), new LobbyCommand(server));
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
         commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
@@ -101,15 +71,12 @@ public class SkyeNetV {
         commandManager.register(commandManager.metaBuilder("chatfilter").aliases("cf").plugin(this).build(), new ChatFilterCommand(chatFilterModule));
 
         // Initialize Discord bot
-        String token = config.getProperty("discord.token");
-        String channelId = config.getProperty("discord.channel");
-
-        if ("YOUR_BOT_TOKEN_HERE".equals(token) || "YOUR_CHANNEL_ID_HERE".equals(channelId)) {
-            logger.warn("Please configure your Discord bot token and channel ID in config.properties");
+        if (!discordConfig.isConfigured()) {
+            logger.warn("Please configure your Discord bot token and channel ID in discord_config.yml");
             return;
         }
 
-        discordManager = new DiscordManager(this, token, channelId);
+        discordManager = new DiscordManager(this, discordConfig);
         discordManager.getJda().addEventListener(new DiscordListener(this, discordManager));
     }
 
@@ -120,17 +87,19 @@ public class SkyeNetV {
         }
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.LATE)
     public void onPlayerChat(PlayerChatEvent event) {
-        // The chat filter will handle filtering in its own event listener
-        // This just handles Discord integration for messages that pass the filter
-        if (discordManager != null && event.getPlayer().getCurrentServer().isPresent() && 
-            event.getResult().isAllowed()) {
-            discordManager.sendChatMessage(
-                event.getPlayer(),
-                event.getMessage(),
-                event.getPlayer().getCurrentServer().get().getServer()
-            );
+        // Handle Discord integration only for messages that passed the chat filter
+        // The chat filter runs with EARLY priority, so this runs after filtering is complete
+        if (discordManager != null && event.getPlayer().getCurrentServer().isPresent()) {
+            // Only send to Discord if the message passes all filters and is allowed
+            if (event.getResult().isAllowed()) {
+                discordManager.sendChatMessage(
+                    event.getPlayer(),
+                    event.getMessage(),
+                    event.getPlayer().getCurrentServer().get().getServer()
+                );
+            }
         }
     }
 
@@ -171,7 +140,30 @@ public class SkyeNetV {
         return rulesConfig;
     }
     
+    public DiscordConfig getDiscordConfig() {
+        return discordConfig;
+    }
+    
     public ChatFilterModule getChatFilterModule() {
         return chatFilterModule;
+    }
+    
+    public void reloadDiscordConfig() throws Exception {
+        logger.info("Reloading Discord configuration...");
+        
+        // Load new configuration
+        DiscordConfig newConfig = new DiscordConfig(dataDirectory, logger);
+        
+        // Update the current configuration
+        this.discordConfig = newConfig;
+        
+        // Restart Discord manager with new configuration
+        if (discordManager != null) {
+            discordManager.shutdown();
+        }
+        
+        discordManager = new DiscordManager(this, discordConfig);
+        
+        logger.info("Discord configuration reloaded successfully!");
     }
 }

@@ -1,0 +1,41 @@
+# SkyeNetV Discord Configuration
+# Use MiniMessage format for colored text: https://docs.advntr.dev/minimessage/format.html
+
+discord:
+  # Your Discord bot token (get from https://discord.com/developers/applications)
+  token: "YOUR_BOT_TOKEN_HERE"
+  
+  # Discord channel ID where messages will be sent
+  channel: "YOUR_CHANNEL_ID_HERE"
+  
+  # Show server prefixes in chat messages
+  show_prefixes: true
+  
+  # Enable chat message filtering integration
+  filter_messages: true
+  
+  # Show filtered message content on hover
+  show_filtered_hover: true
+  
+  # Enable join/leave announcements
+  enable_join_leave: true
+  
+  # Enable server switch announcements
+  enable_server_switch: true
+
+# Message formats using MiniMessage syntax
+messages:
+  # Player join message
+  join: "<green>✅ <bold>{player}</bold> joined the network!</green>"
+  
+  # Player leave message
+  leave: "<red>❌ <bold>{player}</bold> left the network!</red>"
+  
+  # Server switch message
+  server_switch: "<yellow>🔄 <bold>{player}</bold> switched from <italic>{from}</italic> to <italic>{to}</italic></yellow>"
+  
+  # Chat message prefix
+  chat_prefix: "<gray>[<blue>{server}</blue>]</gray> <white><bold>{player}</bold>:</white> "
+  
+  # Hover text for filtered messages
+  filtered_hover: "<red>Original message: {original}</red>"

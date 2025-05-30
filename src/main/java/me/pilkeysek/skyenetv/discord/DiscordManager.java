@@ -3,6 +3,7 @@ package me.pilkeysek.skyenetv.discord;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.pilkeysek.skyenetv.SkyeNetV;
+import me.pilkeysek.skyenetv.config.DiscordConfig;
 import me.pilkeysek.skyenetv.modules.ChatFilterModule;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -12,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -21,46 +23,34 @@ import java.awt.Color;
 public class DiscordManager {
     private final SkyeNetV plugin;
     private final ChatFilterModule chatFilter;
+    private final DiscordConfig discordConfig;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
-    // Configuration options
-    private final boolean showPrefixes;
-    private final boolean filterMessages;
-    private final boolean showFilteredHover;
-    private final boolean enableJoinLeave;
-    private final boolean enableServerSwitch;
-    // ...existing fields...
+    private final PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
+    
     private JDA jda;
     private TextChannel chatChannel;
-    private String token;
-    private String channelId;
 
-    public DiscordManager(SkyeNetV plugin, String token, String channelId) {
+    public DiscordManager(SkyeNetV plugin, DiscordConfig discordConfig) {
         this.plugin = plugin;
-        this.token = token;
-        this.channelId = channelId;
+        this.discordConfig = discordConfig;
         this.chatFilter = plugin.getChatFilterModule();
-        
-        // Load configuration options from plugin config
-        this.showPrefixes = true; // Will implement config reading later
-        this.filterMessages = true;
-        this.showFilteredHover = true;
-        this.enableJoinLeave = true;
-        this.enableServerSwitch = true;
             
         initialize();
     }
 
     private void initialize() {
         try {
-            jda = JDABuilder.createDefault(token)
+            jda = JDABuilder.createDefault(discordConfig.getToken())
                     .build()
                     .awaitReady();
             
-            chatChannel = jda.getTextChannelById(channelId);
+            chatChannel = jda.getTextChannelById(discordConfig.getChannelId());
             if (chatChannel == null) {
-                plugin.getLogger().error("Could not find Discord channel with ID: " + channelId);
+                plugin.getLogger().error("Could not find Discord channel with ID: " + discordConfig.getChannelId());
                 return;
             }
+            
+            plugin.getLogger().info("Discord bot initialized successfully!");
         } catch (Exception e) {
             plugin.getLogger().error("Failed to initialize Discord bot", e);
         }
@@ -70,32 +60,51 @@ public class DiscordManager {
         if (chatChannel == null) return;
         
         String displayMessage;
-        if (filterMessages) {
+        if (discordConfig.isFilterMessages()) {
             // Apply chat filter to the message
             ChatFilterModule.FilterResult filterResult = chatFilter.filterMessage(message, player.getUsername());
             
             // Get player prefix from LuckPerms if enabled
-            String prefix = showPrefixes ? getPlayerPrefix(player) : "";
-            String prefixDisplay = prefix.isEmpty() ? "" : prefix + " ";
-            
+            String prefix = discordConfig.isShowPrefixes() ? getPlayerPrefix(player) : "";
             String serverName = server.getServerInfo().getName();
+            
+            // Create the chat prefix using MiniMessage format
+            String chatPrefix = discordConfig.getChatPrefix()
+                    .replace("{server}", serverName)
+                    .replace("{player}", player.getUsername());
+            
+            // Convert MiniMessage to plain text for Discord
+            Component prefixComponent = miniMessage.deserialize(chatPrefix);
+            String prefixDisplay = plainSerializer.serialize(prefixComponent);
             
             if (filterResult.wasFiltered()) {
                 // Show filtered message with reason in Discord
-                displayMessage = String.format("**%s** %s`%s` » [Filtered: %s]", 
-                        serverName, prefixDisplay, player.getUsername(), filterResult.getFilterReason());
+                displayMessage = String.format("%s [Filtered: %s]", 
+                        prefixDisplay, filterResult.getFilterReason());
+                
+                if (discordConfig.isShowFilteredHover()) {
+                    // Add original message info
+                    displayMessage += String.format(" (Original: %s)", filterResult.getOriginalMessage());
+                }
             } else {
                 // Show normal message
-                displayMessage = String.format("**%s** %s`%s` » %s", 
-                        serverName, prefixDisplay, player.getUsername(), filterResult.getFilteredMessage());
+                displayMessage = prefixDisplay + filterResult.getFilteredMessage();
             }
         } else {
             // No filtering, show message as-is
-            String prefix = showPrefixes ? getPlayerPrefix(player) : "";
-            String prefixDisplay = prefix.isEmpty() ? "" : prefix + " ";
+            String prefix = discordConfig.isShowPrefixes() ? getPlayerPrefix(player) : "";
             String serverName = server.getServerInfo().getName();
-            displayMessage = String.format("**%s** %s`%s` » %s", 
-                    serverName, prefixDisplay, player.getUsername(), message);
+            
+            // Create the chat prefix using MiniMessage format
+            String chatPrefix = discordConfig.getChatPrefix()
+                    .replace("{server}", serverName)
+                    .replace("{player}", player.getUsername());
+            
+            // Convert MiniMessage to plain text for Discord
+            Component prefixComponent = miniMessage.deserialize(chatPrefix);
+            String prefixDisplay = plainSerializer.serialize(prefixComponent);
+            
+            displayMessage = prefixDisplay + message;
         }
         
         chatChannel.sendMessage(displayMessage).queue();
@@ -114,36 +123,59 @@ public class DiscordManager {
     }
 
     public void sendServerSwitch(Player player, RegisteredServer from, RegisteredServer to) {
-        if (chatChannel == null || !enableServerSwitch) return;
+        if (chatChannel == null || !discordConfig.isEnableServerSwitch()) return;
+
+        // Use MiniMessage format from config
+        String switchMessage = discordConfig.getServerSwitchMessage()
+                .replace("{player}", player.getUsername())
+                .replace("{from}", from != null ? from.getServerInfo().getName() : "Unknown")
+                .replace("{to}", to.getServerInfo().getName());
+        
+        // Convert to plain text for Discord
+        Component messageComponent = miniMessage.deserialize(switchMessage);
+        String discordMessage = plainSerializer.serialize(messageComponent);
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setColor(Color.YELLOW)
-                .setDescription(String.format("**%s** switched from `%s` to `%s`",
-                        player.getUsername(),
-                        from != null ? from.getServerInfo().getName() : "null",
-                        to.getServerInfo().getName()))
+                .setDescription(discordMessage)
                 .setTimestamp(java.time.Instant.now());
 
         chatChannel.sendMessageEmbeds(embed.build()).queue();
     }
 
     public void sendPlayerJoin(Player player) {
-        if (chatChannel == null || !enableJoinLeave) return;
+        if (chatChannel == null || !discordConfig.isEnableJoinLeave()) return;
+
+        // Use MiniMessage format from config
+        String joinMessage = discordConfig.getJoinMessage()
+                .replace("{player}", player.getUsername());
+        
+        // Convert to plain text for Discord
+        Component messageComponent = miniMessage.deserialize(joinMessage);
+        String discordMessage = plainSerializer.serialize(messageComponent);
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setColor(Color.GREEN)
-                .setDescription(String.format("**%s** joined the network", player.getUsername()))
+                .setDescription(discordMessage)
                 .setTimestamp(java.time.Instant.now());
 
         chatChannel.sendMessageEmbeds(embed.build()).queue();
     }
 
     public void sendPlayerLeave(Player player) {
-        if (chatChannel == null || !enableJoinLeave) return;
+        if (chatChannel == null || !discordConfig.isEnableJoinLeave()) return;
+
+        // Use MiniMessage format from config
+        String leaveMessage = discordConfig.getLeaveMessage()
+                .replace("{player}", player.getUsername());
+        
+        // Convert to plain text for Discord
+        Component messageComponent = miniMessage.deserialize(leaveMessage);
+        String discordMessage = plainSerializer.serialize(messageComponent);
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setColor(Color.RED)
-                .setDescription(String.format("**%s** left the network", player.getUsername()))
+                .setDescription(discordMessage)
                 .setTimestamp(java.time.Instant.now());
 
         chatChannel.sendMessageEmbeds(embed.build()).queue();
@@ -152,18 +184,18 @@ public class DiscordManager {
     public void broadcastDiscordMessage(String author, String message) {
         Component component;
         
-        if (filterMessages) {
+        if (discordConfig.isFilterMessages()) {
             // Apply chat filter to Discord message
             ChatFilterModule.FilterResult filterResult = chatFilter.filterMessage(message, author);
             
-            if (filterResult.wasFiltered() && showFilteredHover) {
+            if (filterResult.wasFiltered() && discordConfig.isShowFilteredHover()) {
                 // Show filtered message with hover revealing original content
+                String hoverText = discordConfig.getFilteredMessageHover()
+                        .replace("{original}", filterResult.getOriginalMessage());
+                
+                Component hoverComponent = miniMessage.deserialize(hoverText);
                 Component filteredComponent = miniMessage.deserialize("<red>[Filtered]</red>")
-                        .hoverEvent(HoverEvent.showText(Component.text()
-                                .append(Component.text("Original message: " + filterResult.getOriginalMessage(), NamedTextColor.GRAY))
-                                .append(Component.newline())
-                                .append(Component.text("Filtered for: " + filterResult.getFilterReason(), NamedTextColor.RED))
-                                .build()));
+                        .hoverEvent(HoverEvent.showText(hoverComponent));
                 
                 component = Component.text()
                         .append(Component.text("Discord", NamedTextColor.BLUE))

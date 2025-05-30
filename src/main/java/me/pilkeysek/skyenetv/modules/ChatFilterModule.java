@@ -1,6 +1,7 @@
 package me.pilkeysek.skyenetv.modules;
 
 import com.velocitypowered.api.event.EventTask;
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -35,7 +36,7 @@ public class ChatFilterModule {
     private final List<Pattern> asciiPatterns = new ArrayList<>();
     private final List<Pattern> urlPatterns = new ArrayList<>();
     private final List<String> blockedWords = new ArrayList<>();
-    private final String configFolder = "filters";
+    private final String configFolder = "Chat Filter";
     private String prefix;
     private boolean enabled = true;
 
@@ -63,7 +64,7 @@ public class ChatFilterModule {
         File regexFile = new File(folder, "regex.yml");
         if (!regexFile.exists()) {
             try {
-                copyResourceToFile("filters/regex.yml", regexFile);
+                copyResourceToFile("Chat Filter/regex.yml", regexFile);
                 logger.info("Created default regex configuration from template.");
             } catch (Exception e) {
                 logger.warn("Failed to create regex.yml: " + e.getMessage());
@@ -74,7 +75,7 @@ public class ChatFilterModule {
         File wordlistFile = new File(folder, "wordlist.yml");
         if (!wordlistFile.exists()) {
             try {
-                copyResourceToFile("filters/wordlist.yml", wordlistFile);
+                copyResourceToFile("Chat Filter/wordlist.yml", wordlistFile);
                 logger.info("Created default wordlist configuration from template.");
             } catch (Exception e) {
                 logger.warn("Failed to create wordlist.yml: " + e.getMessage());
@@ -267,27 +268,26 @@ public class ChatFilterModule {
         }
     }
 
-    @Subscribe
-    public EventTask onChat(PlayerChatEvent event) {
-        return EventTask.async(() -> {
-            if (!enabled) {
-                return;
-            }
+    @Subscribe(order = PostOrder.FIRST)
+    public void onChat(PlayerChatEvent event) {
+        if (!enabled) {
+            return;
+        }
 
-            String message = event.getMessage();
-            String playerName = event.getPlayer().getUsername();
-            
-            logger.info("Processing message from " + playerName + ": " + message);
+        String message = event.getMessage();
+        String playerName = event.getPlayer().getUsername();
+        
+        logger.info("ChatFilter: Processing message from " + playerName + ": " + message);
 
-            // Check wordlist
-            if (getBoolean(wordlistConfig, "enabled", true) && 
-                !event.getPlayer().hasPermission("skyenetv.wordlist.bypass")) {
-                
+        // Check wordlist
+        if (getBoolean(wordlistConfig, "enabled", true)) {
+            logger.info("ChatFilter: Checking wordlist (bypass permission: " + event.getPlayer().hasPermission("skyenetv.wordlist.bypass") + ")");
+            if (!event.getPlayer().hasPermission("skyenetv.wordlist.bypass")) {
                 for (String word : blockedWords) {
                     if (word != null && !word.isEmpty() && 
                         message.toLowerCase().contains(word.toLowerCase())) {
                         
-                        logger.info("Blocked message from " + playerName + " for word: " + word);
+                        logger.warn("ChatFilter: BLOCKING message from " + playerName + " for word: " + word);
                         event.setResult(PlayerChatEvent.ChatResult.denied());
                         
                         String blockedMsg = getString(wordlistConfig, "blocked-message", 
@@ -299,44 +299,47 @@ public class ChatFilterModule {
                     }
                 }
             }
+        }
 
-            // Check regex patterns
-            if (!event.getPlayer().hasPermission("skyenetv.regex.bypass")) {
-                String blockedMsg = getString(regexConfig, "blocked-message", 
-                    "<prefix>Your message was filtered by pattern: <pattern>");
+        // Check regex patterns
+        if (!event.getPlayer().hasPermission("skyenetv.regex.bypass")) {
+            logger.info("ChatFilter: Checking regex patterns (bypass permission: " + event.getPlayer().hasPermission("skyenetv.regex.bypass") + ")");
+            String blockedMsg = getString(regexConfig, "blocked-message", 
+                "<prefix>Your message was filtered by pattern: <pattern>");
 
-                if (checkPatterns(message, ipPatterns, "IP Address") ||
-                    checkPatterns(message, spamPatterns, "Spam Characters") ||
-                    checkPatterns(message, asciiPatterns, "ASCII Art") ||
-                    checkPatterns(message, urlPatterns, "URL") ||
-                    checkPatterns(message, customPatterns, "Custom Pattern")) {
-                    
-                    logger.info("Blocked message from " + playerName + " for regex pattern");
+            if (checkPatterns(message, ipPatterns, "IP Address") ||
+                checkPatterns(message, spamPatterns, "Spam Characters") ||
+                checkPatterns(message, asciiPatterns, "ASCII Art") ||
+                checkPatterns(message, urlPatterns, "URL") ||
+                checkPatterns(message, customPatterns, "Custom Pattern")) {
+                
+                logger.warn("ChatFilter: BLOCKING message from " + playerName + " for regex pattern");
+                event.setResult(PlayerChatEvent.ChatResult.denied());
+                
+                Component notification = miniMessage.deserialize(
+                    blockedMsg.replace("<prefix>", prefix).replace("<pattern>", "Pattern"));
+                event.getPlayer().sendMessage(notification);
+                return;
+            }
+
+            // Check caps
+            if (getNestedBoolean(regexConfig, "block-caps.enabled", true)) {
+                int minLength = getNestedInt(regexConfig, "block-caps.min-length", 6);
+                int threshold = getNestedInt(regexConfig, "block-caps.threshold", 60);
+                
+                if (message.length() >= minLength && isExcessiveCaps(message, threshold)) {
+                    logger.warn("ChatFilter: BLOCKING message from " + playerName + " for excessive caps");
                     event.setResult(PlayerChatEvent.ChatResult.denied());
                     
                     Component notification = miniMessage.deserialize(
-                        blockedMsg.replace("<prefix>", prefix).replace("<pattern>", "Pattern"));
+                        blockedMsg.replace("<prefix>", prefix).replace("<pattern>", "Excessive Caps"));
                     event.getPlayer().sendMessage(notification);
                     return;
                 }
-
-                // Check caps
-                if (getNestedBoolean(regexConfig, "block-caps.enabled", true)) {
-                    int minLength = getNestedInt(regexConfig, "block-caps.min-length", 6);
-                    int threshold = getNestedInt(regexConfig, "block-caps.threshold", 60);
-                    
-                    if (message.length() >= minLength && isExcessiveCaps(message, threshold)) {
-                        logger.info("Blocked message from " + playerName + " for excessive caps");
-                        event.setResult(PlayerChatEvent.ChatResult.denied());
-                        
-                        Component notification = miniMessage.deserialize(
-                            blockedMsg.replace("<prefix>", prefix).replace("<pattern>", "Excessive Caps"));
-                        event.getPlayer().sendMessage(notification);
-                        return;
-                    }
-                }
             }
-        });
+        } else {
+            logger.info("ChatFilter: Player " + playerName + " has regex bypass permission, skipping regex checks");
+        }
     }
 
     private boolean checkPatterns(String message, List<Pattern> patterns, String type) {

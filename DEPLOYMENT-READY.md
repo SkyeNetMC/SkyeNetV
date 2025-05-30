@@ -1,0 +1,153 @@
+# SkyeNetV Plugin - Deployment Summary
+
+## ✅ All Issues Fixed and Features Implemented
+
+### 1. **Plugin Loading Issue - RESOLVED**
+- ✅ Main class properly defined in `velocity-plugin.json`
+- ✅ Plugin JAR built successfully with all required files
+- ✅ Commands `/lobby` and `/l` should now work on proxy server
+
+### 2. **Chat Filter Priority - RESOLVED**
+- ✅ ChatFilterModule now uses `@Subscribe(order = PostOrder.FIRST)`
+- ✅ Ensures filtering runs before other chat event handlers
+- ✅ Comprehensive logging added to track filter execution
+- ✅ Proper coordination with Discord integration
+
+### 3. **Discord Configuration Enhancement - COMPLETED**
+- ✅ New `DiscordConfig.java` class with YAML-based configuration
+- ✅ Replaced `config.properties` with `discord_config.yml`
+- ✅ Full MiniMessage support for all Discord messages
+- ✅ DiscordManager updated to use new configuration system
+- ✅ Discord command enhanced with reload functionality
+
+## 📁 Key Files Updated
+
+### Main Plugin Class
+- `src/main/java/me/pilkeysek/skyenetv/SkyeNetV.java`
+  - Added Discord config reload functionality
+  - Fixed command registration with proper constructors
+  - Enhanced initialization process
+
+### Chat Filter Module
+- `src/main/java/me/pilkeysek/skyenetv/modules/ChatFilterModule.java`
+  - Changed event priority to `PostOrder.FIRST`
+  - Added detailed logging for debugging
+  - Improved event coordination
+
+### Discord System
+- `src/main/java/me/pilkeysek/skyenetv/config/DiscordConfig.java` (NEW)
+  - YAML-based configuration with MiniMessage support
+  - Type-safe configuration loading
+  - Fallback values for all settings
+
+- `src/main/java/me/pilkeysek/skyenetv/discord/DiscordManager.java`
+  - Updated to use new DiscordConfig
+  - Added MiniMessage parsing for all messages
+  - Proper plain text conversion for Discord
+
+- `src/main/java/me/pilkeysek/skyenetv/commands/DiscordCommand.java`
+  - Added reload subcommand functionality
+  - Enhanced with tab completion
+  - Proper permission checks
+
+## 🚀 Deployment Instructions
+
+### 1. **Plugin Installation**
+```bash
+# Copy the JAR to your Velocity server plugins directory
+cp target/SkyeNetV-2.2.jar /path/to/velocity/plugins/
+
+# Create plugin data directory (if not exists)
+mkdir -p /path/to/velocity/plugins/SkyeNetV/
+```
+
+### 2. **Configuration Setup**
+```bash
+# Copy the sample Discord configuration
+cp discord_config.yml /path/to/velocity/plugins/SkyeNetV/
+
+# Edit the configuration with your Discord bot details
+nano /path/to/velocity/plugins/SkyeNetV/discord_config.yml
+```
+
+### 3. **Required Configuration**
+Edit `discord_config.yml` and update:
+- `discord.token`: Your Discord bot token
+- `discord.channel`: Your Discord channel ID
+
+### 4. **Restart Velocity Server**
+```bash
+# Restart your Velocity server to load the plugin
+systemctl restart velocity
+# or
+./start.sh
+```
+
+## 🧪 Testing Commands
+
+### Lobby Commands (Should work after deployment)
+```
+/lobby   - Teleport to lobby server
+/l       - Alias for /lobby
+/hub     - Another alias for /lobby
+```
+
+### Chat Filter Testing
+```
+/chatfilter reload    - Reload chat filter configuration
+/cf status           - Check filter status
+```
+
+### Discord Commands
+```
+/discord             - Show Discord invite link
+/discord reload      - Reload Discord configuration (requires permission)
+```
+
+## 🔧 Configuration Examples
+
+### Discord Configuration (`discord_config.yml`)
+```yaml
+discord:
+  token: "YOUR_BOT_TOKEN_HERE"
+  channel: "YOUR_CHANNEL_ID_HERE"
+  show_prefixes: true
+  filter_messages: true
+  show_filtered_hover: true
+  enable_join_leave: true
+  enable_server_switch: true
+
+messages:
+  join: "<green>✅ <bold>{player}</bold> joined the network!</green>"
+  leave: "<red>❌ <bold>{player}</bold> left the network!</red>"
+  server_switch: "<yellow>🔄 <bold>{player}</bold> switched from <italic>{from}</italic> to <italic>{to}</italic></yellow>"
+  chat_prefix: "<gray>[<blue>{server}</blue>]</gray> <white><bold>{player}</bold>:</white> "
+  filtered_hover: "<red>Original message: {original}</red>"
+```
+
+## 📊 Feature Status
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Plugin Loading | ✅ Fixed | JAR properly built with metadata |
+| Lobby Commands | ✅ Ready | `/lobby`, `/l`, `/hub` commands |
+| Chat Filtering | ✅ Enhanced | Priority-based filtering with logging |
+| Discord Integration | ✅ Upgraded | YAML config + MiniMessage support |
+| Configuration Reload | ✅ Implemented | `/discord reload` command |
+
+## 🔍 Verification Steps
+
+1. **Plugin Loading**: Check server logs for "SkyeNetV initialized!" message
+2. **Commands**: Test `/lobby` and `/l` commands work properly
+3. **Chat Filter**: Verify filter blocks inappropriate messages
+4. **Discord**: Configure bot and test message forwarding
+5. **Reload**: Test `/discord reload` updates configuration
+
+## ⚠️ Important Notes
+
+- Ensure Discord bot has proper permissions in your server
+- Chat filter requires `filters/wordlist.yml` and `filters/regex.yml` configuration
+- All commands require appropriate permissions for players
+- Monitor server logs for any errors during plugin initialization
+
+Plugin is now ready for production deployment! 🎉

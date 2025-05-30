@@ -5,7 +5,7 @@
 ✅ **Successfully integrated the ChatFilterModule into the SkyeNetV Velocity plugin**
 
 ### Key Changes Made:
- a ad
+
 1. **Converted Bukkit ChatFilterModule to Velocity**
    - Replaced Bukkit events with Velocity events (`PlayerChatEvent`)
    - Updated imports and dependencies
