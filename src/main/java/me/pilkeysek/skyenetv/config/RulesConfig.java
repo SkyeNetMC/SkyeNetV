@@ -74,8 +74,10 @@ public class RulesConfig {
     public void saveConfig() {
         try (Writer writer = Files.newBufferedWriter(configPath)) {
             GSON.toJson(this, writer);
+            logger.info("Rules configuration saved successfully");
         } catch (IOException e) {
             logger.error("Failed to save rules config", e);
+            throw new RuntimeException("Failed to save rules configuration", e);
         }
     }
 
@@ -117,6 +119,16 @@ public class RulesConfig {
     }
 
     public void addRule(Rule rule) {
+        if (rule == null) {
+            throw new IllegalArgumentException("Rule cannot be null");
+        }
+        if (rule.getTitle() == null || rule.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Rule title cannot be null or empty");
+        }
+        if (rule.getDescription() == null || rule.getDescription().trim().isEmpty()) {
+            throw new IllegalArgumentException("Rule description cannot be null or empty");
+        }
+        
         // Find the maximum ID
         int maxId = 0;
         for (Rule r : rules) {
@@ -130,6 +142,7 @@ public class RulesConfig {
         }
         
         rules.add(rule);
+        logger.info("Adding new rule with ID {} and title: {}", rule.getId(), rule.getTitle());
         saveConfig();
     }
 

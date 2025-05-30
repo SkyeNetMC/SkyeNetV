@@ -3,7 +3,6 @@ package me.pilkeysek.skyenetv.commands;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import me.pilkeysek.skyenetv.config.RulesConfig;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.ArrayList;
@@ -45,6 +44,9 @@ public class RulesCommand implements SimpleCommand {
                 case "reload":
                     handleReload(source);
                     break;
+                case "testparse":
+                    handleTestParsing(source, args);
+                    break;
                 default:
                     showRules(source);
                     break;
@@ -78,21 +80,48 @@ public class RulesCommand implements SimpleCommand {
 
         if (args.length < 3) {
             source.sendMessage(MiniMessage.miniMessage().deserialize("<red>Usage: /rules add \"<title>\" \"<description>\"</red>"));
+            source.sendMessage(MiniMessage.miniMessage().deserialize("<gray>Alternative: /rules add <title> <description words...></gray>"));
+            source.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Example: /rules add \"No Griefing\" \"Don't destroy other players' builds\"</yellow>"));
             return;
         }
 
-        // Parse arguments considering quoted strings
-        List<String> parsedArgs = parseQuotedArgs(Arrays.copyOfRange(args, 1, args.length));
-        if (parsedArgs.size() < 2) {
-            source.sendMessage(MiniMessage.miniMessage().deserialize("<red>Usage: /rules add \"<title>\" \"<description>\"</red>"));
-            return;
-        }
+        try {
+            // First try to parse with quotes, then fall back to space-separated
+            List<String> parsedArgs = parseQuotedArgs(Arrays.copyOfRange(args, 1, args.length));
+            
+            // If quote parsing didn't work well, try simple parsing
+            if (parsedArgs.size() < 2 && args.length > 3) {
+                // Fall back to treating first word as title, rest as description
+                String title = args[1];
+                String description = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+                parsedArgs = Arrays.asList(title, description);
+            }
+            
+            // Debug logging
+            System.out.println("DEBUG: Raw args: " + Arrays.toString(args));
+            System.out.println("DEBUG: Parsed args: " + parsedArgs);
+            
+            if (parsedArgs.size() < 2) {
+                source.sendMessage(MiniMessage.miniMessage().deserialize("<red>Usage: /rules add \"<title>\" \"<description>\"</red>"));
+                source.sendMessage(MiniMessage.miniMessage().deserialize("<gray>Alternative: /rules add <title> <description words...></gray>"));
+                source.sendMessage(MiniMessage.miniMessage().deserialize("<gray>You provided " + parsedArgs.size() + " arguments, but 2 are required.</gray>"));
+                return;
+            }
 
-        String title = parsedArgs.get(0);
-        String description = parsedArgs.get(1);
-        
-        rulesConfig.addRule(new RulesConfig.Rule(0, title, description));
-        source.sendMessage(MiniMessage.miniMessage().deserialize("<green>Rule added successfully!</green>"));
+            String title = parsedArgs.get(0);
+            String description = parsedArgs.get(1);
+            
+            if (title.isEmpty() || description.isEmpty()) {
+                source.sendMessage(MiniMessage.miniMessage().deserialize("<red>Title and description cannot be empty!</red>"));
+                return;
+            }
+            
+            rulesConfig.addRule(new RulesConfig.Rule(0, title, description));
+            source.sendMessage(MiniMessage.miniMessage().deserialize("<green>Rule added successfully!</green>"));
+        } catch (Exception e) {
+            source.sendMessage(MiniMessage.miniMessage().deserialize("<red>Error adding rule: " + e.getMessage() + "</red>"));
+            e.printStackTrace(); // For debugging
+        }
     }
 
     private void handleRemoveRule(CommandSource source, String[] args) {
@@ -125,7 +154,7 @@ public class RulesCommand implements SimpleCommand {
             return;
         }
 
-        if (args.length < 3) {
+        if (args.length < 4) {
             source.sendMessage(MiniMessage.miniMessage().deserialize("<red>Usage: /rules edit <id> \"<title>\" \"<description>\"</red>"));
             return;
         }
@@ -143,6 +172,11 @@ public class RulesCommand implements SimpleCommand {
             String title = parsedArgs.get(0);
             String description = parsedArgs.get(1);
             
+            if (title.isEmpty() || description.isEmpty()) {
+                source.sendMessage(MiniMessage.miniMessage().deserialize("<red>Title and description cannot be empty!</red>"));
+                return;
+            }
+            
             boolean updated = rulesConfig.updateRule(id, title, description);
             if (updated) {
                 source.sendMessage(MiniMessage.miniMessage().deserialize("<green>Rule updated successfully!</green>"));
@@ -151,6 +185,8 @@ public class RulesCommand implements SimpleCommand {
             }
         } catch (NumberFormatException e) {
             source.sendMessage(MiniMessage.miniMessage().deserialize("<red>Invalid rule ID. Must be a number.</red>"));
+        } catch (Exception e) {
+            source.sendMessage(MiniMessage.miniMessage().deserialize("<red>Error editing rule: " + e.getMessage() + "</red>"));
         }
     }
 
@@ -198,6 +234,26 @@ public class RulesCommand implements SimpleCommand {
         source.sendMessage(MiniMessage.miniMessage().deserialize("<green>Rules reloaded successfully!</green>"));
     }
 
+    // Test method for debugging argument parsing
+    private void handleTestParsing(CommandSource source, String[] args) {
+        if (!source.hasPermission("skyenetv.rules.admin")) {
+            return;
+        }
+        
+        source.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Testing argument parsing:</yellow>"));
+        source.sendMessage(MiniMessage.miniMessage().deserialize("<gray>Raw arguments: " + Arrays.toString(args) + "</gray>"));
+        
+        if (args.length > 1) {
+            String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
+            List<String> parsed = parseQuotedArgs(subArgs);
+            source.sendMessage(MiniMessage.miniMessage().deserialize("<gray>Parsed arguments: " + parsed.toString() + "</gray>"));
+            
+            for (int i = 0; i < parsed.size(); i++) {
+                source.sendMessage(MiniMessage.miniMessage().deserialize("<gray>Arg " + i + ": '" + parsed.get(i) + "'</gray>"));
+            }
+        }
+    }
+
     @Override
     public List<String> suggest(Invocation invocation) {
         String[] args = invocation.arguments();
@@ -211,6 +267,7 @@ public class RulesCommand implements SimpleCommand {
                 suggestions.add("header");
                 suggestions.add("footer");
                 suggestions.add("reload");
+                suggestions.add("testparse");
             }
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("edit")) {
@@ -257,11 +314,17 @@ public class RulesCommand implements SimpleCommand {
                 currentArg.append(arg.substring(1));
             } else if (arg.endsWith("\"") && insideQuotes) {
                 insideQuotes = false;
-                currentArg.append(" ").append(arg, 0, arg.length() - 1);
+                if (currentArg.length() > 0) {
+                    currentArg.append(" ");
+                }
+                currentArg.append(arg, 0, arg.length() - 1);
                 result.add(currentArg.toString());
                 currentArg = new StringBuilder();
             } else if (insideQuotes) {
-                currentArg.append(" ").append(arg);
+                if (currentArg.length() > 0) {
+                    currentArg.append(" ");
+                }
+                currentArg.append(arg);
             } else {
                 result.add(arg);
             }

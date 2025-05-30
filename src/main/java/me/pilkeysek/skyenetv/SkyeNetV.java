@@ -18,6 +18,8 @@ import me.pilkeysek.skyenetv.commands.DiscordCommand;
 import me.pilkeysek.skyenetv.commands.LobbyCommand;
 import me.pilkeysek.skyenetv.commands.RulesCommand;
 import me.pilkeysek.skyenetv.commands.SudoCommand;
+import me.pilkeysek.skyenetv.commands.ChatFilterCommand;
+import me.pilkeysek.skyenetv.modules.ChatFilterModule;
 import org.slf4j.Logger;
 import com.velocitypowered.api.proxy.ProxyServer;
 
@@ -33,6 +35,7 @@ public class SkyeNetV {
     private final ProxyServer server;
     private final Logger logger;
     private DiscordManager discordManager;
+    private ChatFilterModule chatFilterModule;
     private final Path dataDirectory;
     private Properties config;
     private RulesConfig rulesConfig;
@@ -87,6 +90,11 @@ public class SkyeNetV {
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
         commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
 
+        // Initialize Chat Filter Module
+        chatFilterModule = new ChatFilterModule(server, logger, dataDirectory);
+        server.getEventManager().register(this, chatFilterModule);
+        commandManager.register(commandManager.metaBuilder("chatfilter").aliases("cf").plugin(this).build(), new ChatFilterCommand(chatFilterModule));
+
         // Initialize Discord bot
         String token = config.getProperty("discord.token");
         String channelId = config.getProperty("discord.channel");
@@ -109,7 +117,10 @@ public class SkyeNetV {
 
     @Subscribe
     public void onPlayerChat(PlayerChatEvent event) {
-        if (discordManager != null && event.getPlayer().getCurrentServer().isPresent()) {
+        // The chat filter will handle filtering in its own event listener
+        // This just handles Discord integration for messages that pass the filter
+        if (discordManager != null && event.getPlayer().getCurrentServer().isPresent() && 
+            event.getResult().isAllowed()) {
             discordManager.sendChatMessage(
                 event.getPlayer(),
                 event.getMessage(),
