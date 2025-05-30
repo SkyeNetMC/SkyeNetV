@@ -10,15 +10,17 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.pilkeysek.skyeNetV.commands.DiscordCommand;
+import me.pilkeysek.skyeNetV.commands.RulesCommand;
 import me.pilkeysek.skyeNetV.commands.SkyeNetVCommand;
 import me.pilkeysek.skyeNetV.commands.StoreCommand;
 import me.pilkeysek.skyeNetV.commands.VSudoCommand;
+import me.pilkeysek.skyeNetV.config.RulesConfig;
 import org.slf4j.Logger;
 
 import java.io.*;
 import java.nio.file.Path;
 
-@Plugin(id = "skyenetv", name = "SkyeNetV", version = BuildConstants.VERSION, description = "Velocity Plugin for SkyeNet", url = "store.skyenet.co.in", authors = {"PilkeySEK"})
+@Plugin(id = "skyenetv", name = "SkyeNetV", version = "2.0", description = "Velocity Plugin for SkyeNet", url = "store.skyenet.co.in", authors = {"PilkeySEK"})
 public class SkyeNetV {
 
     public static File configurationFile;
@@ -70,7 +72,7 @@ public class SkyeNetV {
             logger.error(e.getMessage());
         }
         registerCommands();
-        logger.info("SkyeNetV version " + BuildConstants.VERSION + " initialized.");
+        logger.info("SkyeNetV version 2.0 initialized.");
     }
 
     private void registerCommands() {
@@ -91,6 +93,13 @@ public class SkyeNetV {
         manager.register(
                 manager.metaBuilder("store").aliases("shop").plugin(this).build(),
                 StoreCommand.createBrigadierCommand(proxy)
+        );
+        
+        // Initialize RulesConfig and register RulesCommand
+        RulesConfig rulesConfig = new RulesConfig(dataDirectory, logger);
+        manager.register(
+                manager.metaBuilder("rules").plugin(this).build(),
+                new RulesCommand(rulesConfig)
         );
     }
 

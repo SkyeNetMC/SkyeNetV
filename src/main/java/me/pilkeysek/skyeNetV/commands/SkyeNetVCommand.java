@@ -5,13 +5,12 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
-import me.pilkeysek.skyeNetV.BuildConstants;
 import me.pilkeysek.skyeNetV.SkyeNetV;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 public class SkyeNetVCommand {
 
-    private static final String VERSION_MESSAGE = "<aqua>SkyeNetV</aqua><br><gold>Version: </gold><dark_aqua>" + BuildConstants.VERSION + "</dark_aqua>";
+    private static final String VERSION_MESSAGE = "<aqua>SkyeNetV</aqua><br><gold>Version: </gold><dark_aqua>2.0</dark_aqua>";
     private static final String NO_SUBCOMMAND_PERMISSION_MESSAGE = "<gray>You do not have permission to execute any subcommand.</gray>";
     private static final String START_RELOADING_MESSAGE = "<aqua>Starting reload...</aqua>";
     private static final String RELOAD_SUCCESS_MESSAGE = "<aqua>Successfully reloaded!</aqua>";
