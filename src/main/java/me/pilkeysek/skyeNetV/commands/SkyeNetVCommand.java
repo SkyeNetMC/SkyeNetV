@@ -1,4 +1,4 @@
-package me.pilkeysek.skyeNetV.commands;
+ package me.pilkeysek.skyeNetV.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
