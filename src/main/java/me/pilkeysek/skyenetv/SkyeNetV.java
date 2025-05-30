@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Properties;
 
-@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "2.1",
+@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "2.2",
         url = "skye.host", description = "Utilities for SkyeNet Velocity ProxyServer (smth like that)", authors = {"PilkeySEK"})
 public class SkyeNetV {
 
@@ -66,6 +66,11 @@ public class SkyeNetV {
                 configFile.createNewFile();
                 config.setProperty("discord.token", "YOUR_BOT_TOKEN_HERE");
                 config.setProperty("discord.channel", "YOUR_CHANNEL_ID_HERE");
+                config.setProperty("discord.show_prefixes", "true");
+                config.setProperty("discord.filter_messages", "true");
+                config.setProperty("discord.show_filtered_hover", "true");
+                config.setProperty("discord.enable_join_leave", "true");
+                config.setProperty("discord.enable_server_switch", "true");
                 config.store(java.nio.file.Files.newOutputStream(configFile.toPath()), "SkyeNetV Configuration");
             } catch (IOException e) {
                 logger.error("Failed to create config file", e);
@@ -164,5 +169,9 @@ public class SkyeNetV {
     
     public RulesConfig getRulesConfig() {
         return rulesConfig;
+    }
+    
+    public ChatFilterModule getChatFilterModule() {
+        return chatFilterModule;
     }
 }

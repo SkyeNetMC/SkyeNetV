@@ -2,9 +2,16 @@
 
 A comprehensive Velocity plugin for the SkyeNet Minecraft server network, providing server management utilities and rules system.
 
-## Version 2.1
+## Version 2.2
 
-### New Features
+### New Features in 2.2
+- **Chat Filter System**: Network-wide chat filtering with comprehensive word and pattern blocking
+- **Existing Filter Integration**: Uses existing `filters/regex.yml` and `filters/wordlist.yml` configurations
+- **Advanced Pattern Detection**: IP blocking, spam detection, caps filtering, ASCII art detection, URL filtering
+- **Bypass Permissions**: Multi-level permission system for different filter types
+- **Real-time Reload**: Update filters without server restart
+
+### Features from 2.1
 - **Server Rules System**: Complete rules management with JSON-based configuration
 - **MiniMessage Support**: Rich text formatting with gradients and colors
 - **Admin Commands**: Full CRUD operations for rule management
@@ -12,10 +19,11 @@ A comprehensive Velocity plugin for the SkyeNet Minecraft server network, provid
 
 ## Installation
 
-1. Download the latest `SkyeNetV-2.1.jar` from releases
+1. Download the latest `SkyeNetV-2.2.jar` from releases
 2. Place the JAR file in your Velocity `plugins/` directory
 3. Restart your Velocity proxy server
 4. The plugin will create necessary configuration files in `plugins/skyenetv/`
+5. Chat filter will automatically copy existing filter configurations from resources
 
 ## Features
 
