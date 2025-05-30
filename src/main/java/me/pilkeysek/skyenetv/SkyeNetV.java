@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Properties;
 
-@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "1.0.0",
+@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "2.0",
         url = "skye.host", description = "Utilities for SkyeNet Velocity ProxyServer (smth like that)", authors = {"PilkeySEK"})
 public class SkyeNetV {
 

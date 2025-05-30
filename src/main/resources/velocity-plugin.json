@@ -4,7 +4,7 @@
     "version": "2.0",
     "description": "Utilities for SkyeNet Velocity ProxyServer",
     "url": "https://skyenet.co.in",
-    "authors": ["PilkeySEK"],
+    "authors": ["NobleSKye", "PilkeySEK", "SkyeNetwork Team"],
     "dependencies": [],
     "main": "me.pilkeysek.skyenetv.SkyeNetV"
 }
