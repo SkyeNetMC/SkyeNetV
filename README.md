@@ -5,10 +5,9 @@ A comprehensive Velocity plugin for the SkyeNet Minecraft server network, provid
 ## Version 2.2
 
 ### New Features in 2.2
-- **Chat Filter System**: Network-wide chat filtering with comprehensive word and pattern blocking
-- **Existing Filter Integration**: Uses existing `filters/regex.yml` and `filters/wordlist.yml` configurations
-- **Advanced Pattern Detection**: IP blocking, spam detection, caps filtering, ASCII art detection, URL filtering
-- **Bypass Permissions**: Multi-level permission system for different filter types
+- **Discord Integration**: Enhanced Discord bot connectivity and chat bridging
+- **Rules System**: Comprehensive rules management system
+- **Server Management**: Improved lobby commands and administrative tools
 - **Real-time Reload**: Update filters without server restart
 
 ### Features from 2.1
@@ -23,17 +22,8 @@ A comprehensive Velocity plugin for the SkyeNet Minecraft server network, provid
 2. Place the JAR file in your Velocity `plugins/` directory
 3. Restart your Velocity proxy server
 4. The plugin will create necessary configuration files in `plugins/skyenetv/`
-5. Chat filter will automatically copy existing filter configurations from resources
 
 ## Features
-
-### 🛡️ Chat Filter System
-- **Network-wide Filtering**: Filter messages across all servers in your proxy network
-- **Word List Blocking**: Block specific words and phrases
-- **Advanced Regex Patterns**: IP detection, spam prevention, caps filtering, and custom patterns
-- **Bypass Permissions**: Allow trusted players to bypass specific filters
-- **Real-time Configuration**: Reload filters without server restart
-- **Discord Integration**: Filtered messages are blocked before reaching Discord
 
 ### 🛡️ Server Rules System
 - **Dynamic Rule Management**: Add, edit, and remove rules on-the-fly
@@ -50,12 +40,6 @@ The plugin supports the full MiniMessage specification for rich text formatting:
 - **Combined Effects**: `<red><bold>Important Rule</bold></red>`
 
 ## Commands
-
-### `/chatfilter` - Chat Filter Management
-
-#### Admin Commands (Requires `skyenetv.chatfilter.admin` permission)
-- **`/chatfilter reload`** - Reload chat filter configuration
-- **`/chatfilter help`** - Show help information
 
 ### `/rules` - Server Rules Management
 
@@ -84,71 +68,9 @@ The plugin supports the full MiniMessage specification for rich text formatting:
 
 | Permission | Description | Default |
 |------------|-------------|---------|
-| `skyenetv.chatfilter.admin` | Access to chat filter management commands | OP only |
-| `skyenetv.chatfilter.bypass` | Bypass all chat filters | OP only |
-| `skyenetv.wordlist.bypass` | Bypass wordlist filtering only | OP only |
-| `skyenetv.regex.bypass` | Bypass regex pattern filtering only | OP only |
 | `skyenetv.rules.admin` | Access to all rule management commands | OP only |
 
 ## Configuration
-
-### Chat Filter Configuration
-
-The chat filter creates three configuration files:
-
-#### `plugins/skyenetv/chatfilter-config.yml` - Main Configuration
-```yaml
-enabled: true
-prefix: "<dark_red>[ChatFilter]</dark_red> "
-debug: false
-blocked-words: []  # Global blocked words
-modules:
-  ChatFilter:
-    enabled: true
-    wordlist:
-      enabled: true
-    regex:
-      enabled: true
-```
-
-#### `plugins/skyenetv/chatfilter/wordlist.yml` - Blocked Words
-```yaml
-enabled: true
-bypass-permission: "skyenetv.wordlist.bypass"
-blocked-message: "<prefix>Your message was filtered for containing a blocked word: <word>"
-list:
-  - "badword"
-  - "spam"
-  - "example"
-```
-
-#### `plugins/skyenetv/chatfilter/regex.yml` - Pattern Filtering
-```yaml
-bypass-permission: "skyenetv.chatfilter.bypass"
-Enable-regex: true
-blocked-message: "<prefix>Your message was filtered by pattern: <pattern>"
-
-block-ips:
-  enabled: true
-  regex: "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b"
-
-block-spam-chars:
-  enabled: true
-  threshold: 4
-  regex: "(.)\\1{3,}"
-
-block-caps:
-  enabled: true
-  threshold: 60
-  min-length: 6
-
-custom-patterns:
-  enabled: false
-  patterns:
-    test-pattern: "\\b(badword\\d+)\\b"
-```
-
-For detailed chat filter documentation, see [CHATFILTER-README.md](CHATFILTER-README.md).
 
 ### Rules Configuration (`plugins/skyenetv/rules.json`)
 
