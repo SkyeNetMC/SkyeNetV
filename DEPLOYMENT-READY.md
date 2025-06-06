@@ -48,7 +48,7 @@
 ### 1. **Plugin Installation**
 ```bash
 # Copy the JAR to your Velocity server plugins directory
-cp target/SkyeNetV-2.2.jar /path/to/velocity/plugins/
+cp target/SkyeNetV-2.3.jar /path/to/velocity/plugins/
 
 # Create plugin data directory (if not exists)
 mkdir -p /path/to/velocity/plugins/SkyeNetV/
@@ -85,10 +85,10 @@ systemctl restart velocity
 /hub     - Another alias for /lobby
 ```
 
-### Chat Filter Testing
+### Rules Commands
 ```
-/chatfilter reload    - Reload chat filter configuration
-/cf status           - Check filter status
+/rules               - Display server rules
+/rules reload        - Reload rules configuration (requires permission)
 ```
 
 ### Discord Commands
@@ -105,8 +105,6 @@ discord:
   token: "YOUR_BOT_TOKEN_HERE"
   channel: "YOUR_CHANNEL_ID_HERE"
   show_prefixes: true
-  filter_messages: true
-  show_filtered_hover: true
   enable_join_leave: true
   enable_server_switch: true
 
@@ -115,7 +113,6 @@ messages:
   leave: "<red>❌ <bold>{player}</bold> left the network!</red>"
   server_switch: "<yellow>🔄 <bold>{player}</bold> switched from <italic>{from}</italic> to <italic>{to}</italic></yellow>"
   chat_prefix: "<gray>[<blue>{server}</blue>]</gray> <white><bold>{player}</bold>:</white> "
-  filtered_hover: "<red>Original message: {original}</red>"
 ```
 
 ## 📊 Feature Status
@@ -124,7 +121,7 @@ messages:
 |---------|--------|-------|
 | Plugin Loading | ✅ Fixed | JAR properly built with metadata |
 | Lobby Commands | ✅ Ready | `/lobby`, `/l`, `/hub` commands |
-| Chat Filtering | ✅ Enhanced | Priority-based filtering with logging |
+| Rules System | ✅ Ready | `/rules` command with configuration |
 | Discord Integration | ✅ Upgraded | YAML config + MiniMessage support |
 | Configuration Reload | ✅ Implemented | `/discord reload` command |
 
@@ -132,14 +129,14 @@ messages:
 
 1. **Plugin Loading**: Check server logs for "SkyeNetV initialized!" message
 2. **Commands**: Test `/lobby` and `/l` commands work properly
-3. **Chat Filter**: Verify filter blocks inappropriate messages
+3. **Rules**: Test `/rules` command displays server rules
 4. **Discord**: Configure bot and test message forwarding
 5. **Reload**: Test `/discord reload` updates configuration
 
 ## ⚠️ Important Notes
 
 - Ensure Discord bot has proper permissions in your server
-- Chat filter requires `filters/wordlist.yml` and `filters/regex.yml` configuration
+- Rules system requires `rules.json` configuration file
 - All commands require appropriate permissions for players
 - Monitor server logs for any errors during plugin initialization
 

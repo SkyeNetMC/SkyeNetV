@@ -1,16 +1,23 @@
-# SkyeNetV - SkyeNet Velocity Plugin
-
-A comprehensive Velocity plugin for the SkyeNet Minecraft server network, providing server management utilities and rules system.
-
-## Version 2.2
-
-### New Features in 2.2
+# SkyeNetV - ### Features from 2.2
 - **Discord Integration**: Enhanced Discord bot connectivity and chat bridging
 - **Rules System**: Comprehensive rules management system
 - **Server Management**: Improved lobby commands and administrative tools
 - **Real-time Reload**: Update configurations without server restart
 
-### Features from 2.1
+### Features from 2.1kyeNet Velocity Plugin
+
+A comprehensive Velocity plugin for the SkyeNet Minecraft server network, providing server management utilities and rules system.
+
+## Version 2.2
+
+### New Features in 2.3
+- **Simplified Plugin**: Removed chat filter functionality for cleaner, focused design
+- **Discord Integration**: Enhanced Discord bot connectivity and chat bridging  
+- **Rules System**: Comprehensive rules management system
+- **Server Management**: Improved lobby commands and administrative tools
+- **Real-time Reload**: Update configurations without server restart
+
+### Features from 2.2
 - **Server Rules System**: Complete rules management with JSON-based configuration
 - **MiniMessage Support**: Rich text formatting with gradients and colors
 - **Admin Commands**: Full CRUD operations for rule management
@@ -18,7 +25,7 @@ A comprehensive Velocity plugin for the SkyeNet Minecraft server network, provid
 
 ## Installation
 
-1. Download the latest `SkyeNetV-2.2.jar` from releases
+1. Download the latest `SkyeNetV-2.3.jar` from releases
 2. Place the JAR file in your Velocity `plugins/` directory
 3. Restart your Velocity proxy server
 4. The plugin will create necessary configuration files in `plugins/skyenetv/`

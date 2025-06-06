@@ -89,12 +89,6 @@ public class DiscordConfig {
                   # Show server prefixes in chat messages
                   show_prefixes: true
                   
-                  # Enable chat message filtering integration
-                  filter_messages: true
-                  
-                  # Show filtered message content on hover
-                  show_filtered_hover: true
-                  
                   # Enable join/leave notifications
                   enable_join_leave: true
                   
