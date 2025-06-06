@@ -20,8 +20,7 @@ import me.pilkeysek.skyenetv.commands.DiscordCommand;
 import me.pilkeysek.skyenetv.commands.LobbyCommand;
 import me.pilkeysek.skyenetv.commands.RulesCommand;
 import me.pilkeysek.skyenetv.commands.SudoCommand;
-import me.pilkeysek.skyenetv.commands.ChatFilterCommand;
-import me.pilkeysek.skyenetv.modules.ChatFilterModule;
+
 import org.slf4j.Logger;
 import com.velocitypowered.api.proxy.ProxyServer;
 
@@ -34,7 +33,6 @@ public class SkyeNetV {
     private final ProxyServer server;
     private final Logger logger;
     private DiscordManager discordManager;
-    private ChatFilterModule chatFilterModule;
     private final Path dataDirectory;
     private DiscordConfig discordConfig;
     private RulesConfig rulesConfig;
@@ -65,11 +63,6 @@ public class SkyeNetV {
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
         commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
 
-        // Initialize Chat Filter Module
-        chatFilterModule = new ChatFilterModule(server, logger, dataDirectory);
-        server.getEventManager().register(this, chatFilterModule);
-        commandManager.register(commandManager.metaBuilder("chatfilter").aliases("cf").plugin(this).build(), new ChatFilterCommand(chatFilterModule));
-
         // Initialize Discord bot
         if (!discordConfig.isConfigured()) {
             logger.warn("Please configure your Discord bot token and channel ID in discord_config.yml");
@@ -89,17 +82,13 @@ public class SkyeNetV {
 
     @Subscribe(order = PostOrder.LATE)
     public void onPlayerChat(PlayerChatEvent event) {
-        // Handle Discord integration only for messages that passed the chat filter
-        // The chat filter runs with EARLY priority, so this runs after filtering is complete
+        // Handle Discord integration
         if (discordManager != null && event.getPlayer().getCurrentServer().isPresent()) {
-            // Only send to Discord if the message passes all filters and is allowed
-            if (event.getResult().isAllowed()) {
-                discordManager.sendChatMessage(
-                    event.getPlayer(),
-                    event.getMessage(),
-                    event.getPlayer().getCurrentServer().get().getServer()
-                );
-            }
+            discordManager.sendChatMessage(
+                event.getPlayer(),
+                event.getMessage(),
+                event.getPlayer().getCurrentServer().get().getServer()
+            );
         }
     }
 
@@ -142,10 +131,6 @@ public class SkyeNetV {
     
     public DiscordConfig getDiscordConfig() {
         return discordConfig;
-    }
-    
-    public ChatFilterModule getChatFilterModule() {
-        return chatFilterModule;
     }
     
     public void reloadDiscordConfig() throws Exception {
