@@ -7,13 +7,7 @@
 - ✅ Plugin JAR built successfully with all required files
 - ✅ Commands `/lobby` and `/l` should now work on proxy server
 
-### 2. **Chat Filter Priority - RESOLVED**
-- ✅ ChatFilterModule now uses `@Subscribe(order = PostOrder.FIRST)`
-- ✅ Ensures filtering runs before other chat event handlers
-- ✅ Comprehensive logging added to track filter execution
-- ✅ Proper coordination with Discord integration
-
-### 3. **Discord Configuration Enhancement - COMPLETED**
+### 2. **Discord Configuration Enhancement - COMPLETED**
 - ✅ New `DiscordConfig.java` class with YAML-based configuration
 - ✅ Replaced `config.properties` with `discord_config.yml`
 - ✅ Full MiniMessage support for all Discord messages
@@ -28,14 +22,13 @@
   - Fixed command registration with proper constructors
   - Enhanced initialization process
 
-### Chat Filter Module
-- `src/main/java/me/pilkeysek/skyenetv/modules/ChatFilterModule.java`
-  - Changed event priority to `PostOrder.FIRST`
-  - Added detailed logging for debugging
-  - Improved event coordination
+### Rules System
+- `src/main/java/me/pilkeysek/skyenetv/modules/RulesModule.java`
+  - Handles server rules functionality
+  - Integrates with Discord for rule violations
 
 ### Discord System
-- `src/main/java/me/pilkeysek/skyenetv/config/DiscordConfig.java` (NEW)
+- `src/main/java/me/pilkeysek/skyenetv/config/DiscordConfig.java`
   - YAML-based configuration with MiniMessage support
   - Type-safe configuration loading
   - Fallback values for all settings

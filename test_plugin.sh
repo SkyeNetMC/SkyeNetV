@@ -37,17 +37,11 @@ else
 fi
 
 echo ""
-echo "Chat filter configurations:"
-if [ -f src/main/resources/filters/wordlist.yml ]; then
-    echo "✅ wordlist.yml present"
+echo "Rules configuration:"
+if [ -f src/main/resources/rules.json ]; then
+    echo "✅ rules.json present"
 else
-    echo "❌ wordlist.yml missing"
-fi
-
-if [ -f src/main/resources/filters/regex.yml ]; then
-    echo "✅ regex.yml present"
-else
-    echo "❌ regex.yml missing"
+    echo "❌ rules.json missing"
 fi
 
 echo ""

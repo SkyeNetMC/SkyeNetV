@@ -20,8 +20,6 @@ public class DiscordConfig {
     private String token = "YOUR_BOT_TOKEN_HERE";
     private String channelId = "YOUR_CHANNEL_ID_HERE";
     private boolean showPrefixes = true;
-    private boolean filterMessages = true;
-    private boolean showFilteredHover = true;
     private boolean enableJoinLeave = true;
     private boolean enableServerSwitch = true;
     
@@ -30,7 +28,6 @@ public class DiscordConfig {
     private String leaveMessage = "<red>❌ <bold>{player}</bold> left the network!</red>";
     private String serverSwitchMessage = "<yellow>🔄 <bold>{player}</bold> switched from <italic>{from}</italic> to <italic>{to}</italic></yellow>";
     private String chatPrefix = "<gray>[<blue>{server}</blue>]</gray> <white><bold>{player}</bold>:</white> ";
-    private String filteredMessageHover = "<red>Original message: {original}</red>";
     
     public DiscordConfig(Path dataDirectory, Logger logger) {
         this.dataDirectory = dataDirectory;
@@ -59,8 +56,6 @@ public class DiscordConfig {
             token = getString("discord.token", token);
             channelId = getString("discord.channel", channelId);
             showPrefixes = getBoolean("discord.show_prefixes", showPrefixes);
-            filterMessages = getBoolean("discord.filter_messages", filterMessages);
-            showFilteredHover = getBoolean("discord.show_filtered_hover", showFilteredHover);
             enableJoinLeave = getBoolean("discord.enable_join_leave", enableJoinLeave);
             enableServerSwitch = getBoolean("discord.enable_server_switch", enableServerSwitch);
             
@@ -69,7 +64,6 @@ public class DiscordConfig {
             leaveMessage = getString("messages.leave", leaveMessage);
             serverSwitchMessage = getString("messages.server_switch", serverSwitchMessage);
             chatPrefix = getString("messages.chat_prefix", chatPrefix);
-            filteredMessageHover = getString("messages.filtered_hover", filteredMessageHover);
             
             logger.info("Discord configuration loaded successfully!");
             
@@ -119,9 +113,6 @@ public class DiscordConfig {
                   
                   # Chat message prefix (variables: {server}, {player})
                   chat_prefix: "<gray>[<blue>{server}</blue>]</gray> <white><bold>{player}</bold>:</white> "
-                  
-                  # Hover text for filtered messages (variables: {original})
-                  filtered_hover: "<red>Original message: {original}</red>"
                 """;
             
             FileWriter writer = new FileWriter(configFile);
@@ -181,8 +172,6 @@ public class DiscordConfig {
     public String getToken() { return token; }
     public String getChannelId() { return channelId; }
     public boolean isShowPrefixes() { return showPrefixes; }
-    public boolean isFilterMessages() { return filterMessages; }
-    public boolean isShowFilteredHover() { return showFilteredHover; }
     public boolean isEnableJoinLeave() { return enableJoinLeave; }
     public boolean isEnableServerSwitch() { return enableServerSwitch; }
     
@@ -190,7 +179,6 @@ public class DiscordConfig {
     public String getLeaveMessage() { return leaveMessage; }
     public String getServerSwitchMessage() { return serverSwitchMessage; }
     public String getChatPrefix() { return chatPrefix; }
-    public String getFilteredMessageHover() { return filteredMessageHover; }
     
     // Check if Discord is properly configured
     public boolean isConfigured() {

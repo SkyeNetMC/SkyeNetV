@@ -17,7 +17,6 @@ cp /mnt/sda4/SkyeNetwork/SkyeNetV/target/SkyeNetV-2.2.jar /path/to/velocity/plug
 ### 3. Start Server
 - Start your Velocity proxy server
 - Monitor console for any errors during startup
-- Chat filter will automatically initialize with existing configurations
 
 ### 4. Verify Installation
 ```bash
@@ -25,61 +24,35 @@ cp /mnt/sda4/SkyeNetwork/SkyeNetV/target/SkyeNetV-2.2.jar /path/to/velocity/plug
 /plugins
 # Should show SkyeNetV version 2.2
 
-# Test chat filter admin commands
-/chatfilter help
-/chatfilter reload
+# Test core commands
+/rules
+/lobby
 ```
 
-## Chat Filter Configuration
+## Configuration
 
-### Automatic Setup
-The chat filter will automatically:
-1. Create `plugins/skyenetv/filters/` directory
-2. Copy `regex.yml` and `wordlist.yml` from plugin resources
-3. Load 785+ blocked words from existing wordlist
-4. Enable comprehensive regex patterns (IP, spam, caps, URLs, etc.)
+### Discord Integration
+Configure your Discord bot token and channel ID in `discord_config.yml`.
 
-### Manual Configuration
-If you want to customize the filters:
-1. Edit `plugins/skyenetv/filters/regex.yml` for pattern settings
-2. Edit `plugins/skyenetv/filters/wordlist.yml` for word blocking
-3. Run `/chatfilter reload` to apply changes
+### Rules Configuration
+The plugin will create a default `rules.json` file with example rules.
 
 ## Permissions Setup
 
 Add these permissions to your permission manager:
 
 ### Admin Permissions
-- `skyenetv.chatfilter.admin` - Access to filter management commands
 - `skyenetv.rules.admin` - Access to rules management commands  
 - `skyenetv.sudo` - Access to sudo command
 
-### Bypass Permissions (for trusted players)
-- `skyenetv.chatfilter.bypass` - Bypass all chat filters
-- `skyenetv.wordlist.bypass` - Bypass only wordlist filtering
-- `skyenetv.regex.bypass` - Bypass only regex pattern filtering
+## Testing Features
 
-## Testing Chat Filter
+### Test Rules System
+- Use `/rules` to display rules
+- Use `/rules add "Title" "Description"` to add rules (with admin permission)
 
-### Test Blocked Words
-Try sending messages with common blocked words to verify filtering works.
-
-### Test Regex Patterns
-- **IP Addresses**: `192.168.1.1`
-- **Spam Characters**: `helloooooo`
-- **Excessive Caps**: `HELLO WORLD THIS IS VERY LOUD`
-- **URLs**: `https://malicious-site.com`
-
-### Test Bypass Permissions
-Grant bypass permissions to test that trusted players can send filtered content.
-
-## Network-Wide Filtering
-
-The chat filter now works at the **Velocity proxy level**, meaning:
-- ✅ Messages are filtered before reaching backend servers
-- ✅ Consistent filtering across all servers in your network
-- ✅ Filtered messages don't reach Discord integration
-- ✅ Reduces load on individual Minecraft servers
+### Test Discord Integration
+- Send messages in-game to verify Discord bridge functionality
 
 ## Rollback Instructions
 
@@ -89,8 +62,6 @@ If you need to rollback:
 # Restore backup
 mv /path/to/velocity/plugins/SkyeNetV-2.1.jar.backup /path/to/velocity/plugins/SkyeNetV-2.1.jar
 rm /path/to/velocity/plugins/SkyeNetV-2.2.jar
-# Remove chat filter configs if desired
-rm -rf /path/to/velocity/plugins/skyenetv/filters/
 # Start server
 ```
 
@@ -99,11 +70,10 @@ rm -rf /path/to/velocity/plugins/skyenetv/filters/
 - Check console logs for any error messages
 - Verify file permissions on plugin directory
 - Ensure Velocity version compatibility (3.1.1+)
-- Review `CHATFILTER-README.md` for detailed configuration options
+- Review plugin documentation for configuration options
 
 ---
 
 **Version**: SkyeNetV 2.2  
-**Build Date**: May 30, 2025  
-**Size**: 40KB  
+**Build Date**: June 5, 2025  
 **Dependencies**: SnakeYAML 2.0, Adventure Text 4.14.0, JDA 5.0.0-beta.13

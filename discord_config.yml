@@ -11,12 +11,6 @@ discord:
   # Show server prefixes in chat messages
   show_prefixes: true
   
-  # Enable chat message filtering integration
-  filter_messages: true
-  
-  # Show filtered message content on hover
-  show_filtered_hover: true
-  
   # Enable join/leave announcements
   enable_join_leave: true
   
@@ -36,6 +30,3 @@ messages:
   
   # Chat message prefix
   chat_prefix: "<gray>[<blue>{server}</blue>]</gray> <white><bold>{player}</bold>:</white> "
-  
-  # Hover text for filtered messages
-  filtered_hover: "<red>Original message: {original}</red>"

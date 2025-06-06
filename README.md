@@ -8,7 +8,7 @@ A comprehensive Velocity plugin for the SkyeNet Minecraft server network, provid
 - **Discord Integration**: Enhanced Discord bot connectivity and chat bridging
 - **Rules System**: Comprehensive rules management system
 - **Server Management**: Improved lobby commands and administrative tools
-- **Real-time Reload**: Update filters without server restart
+- **Real-time Reload**: Update configurations without server restart
 
 ### Features from 2.1
 - **Server Rules System**: Complete rules management with JSON-based configuration
