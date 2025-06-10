@@ -1,6 +1,130 @@
 # Changelog
 
+## Version 2.4.3 (June 10, 2025)
+
+### Maintenance Release
+- **Version Bump**: Updated version number to 2.4.3 for consistency
+- **Build Updates**: Updated all build files and metadata
+- **No Functional Changes**: All features from 2.4.1 remain unchanged
+
+## Version 2.4.1 (June 10, 2025)
+
+### New Features
+- **Enhanced Global Chat System**: Advanced network-wide chat functionality with granular controls
+  - **Settings Menu**: New `/gc settings` command with interactive clickable settings
+  - **Icon Toggle**: Players can show/hide the globe emoji (🌐) with `/gc toggle icon`
+  - **Message Control**: Separate toggles for receiving and sending global messages
+    - `/gc toggle receive` - Control whether you see global messages
+    - `/gc toggle send` - Control whether your messages go to global chat
+  - **Tab Completion**: Full tab completion support for all commands and subcommands
+
+- **Server Hover Information**: Enhanced global chat display with server details
+  - Hovering over the globe emoji (🌐) shows:
+    - Player name and current server
+    - "Global Chat" indicator with formatting
+    - Server name highlighting in yellow
+
+- **Enhanced LuckPerms Integration**: Full rank color and formatting support
+  - **Player Name Colors**: Automatic color application from LuckPerms groups
+  - **Meta Value Support**: Supports `name-color` and `group-color` meta values
+  - **Full Formatting**: Combines prefix, colored username, and suffix seamlessly
+  - **Rich Text Support**: Complete MiniMessage format support for all LuckPerms elements
+
+### UI/UX Improvements
+- **Interactive Settings Menu**: Clickable toggles with visual status indicators (✓/✗)
+- **Contextual Help**: Settings command link provided when toggling global chat
+- **Visual Status Indicators**: Clear ON/OFF status with color coding (green/red)
+- **Hover Tooltips**: Informative hover text for better user experience
+- **Formatted Borders**: Professional-looking settings menu with decorative borders
+
+### Bug Fixes
+- **Permission Issues**: Fixed GlobalChatCommand to allow all players to use global chat
+- **LobbyCommand Error Handling**: Enhanced error messages and debugging information
+  - Now shows available servers when 'lobby' server is not found
+  - Better handling of edge cases and server connection issues
+- **Metadata Updates**: Fixed velocity-plugin.json version number to match actual version
+- **Code Cleanup**: Removed unused imports and fields for cleaner compilation
+
+### Technical Improvements
+- **Modular Settings System**: New `GlobalChatSettings` class for per-player preferences
+- **Enhanced Color Processing**: Advanced LuckPerms color extraction and application
+- **Improved Message Formatting**: Better component building for complex chat messages
+- **Tab Completion System**: Comprehensive command completion for better usability
+- **Memory Efficient**: Optimized storage of player preferences and settings
+
+### Command Reference
+```
+/gc                    # Toggle global chat on/off
+/gc settings          # Open interactive settings menu
+/gc toggle icon       # Toggle globe emoji display
+/gc toggle receive    # Toggle receiving global messages
+/gc toggle send       # Toggle sending to global chat
+```
+
+### LuckPerms Meta Values
+The plugin now supports these LuckPerms meta values:
+- `name-color` - Sets the color of the player's username
+- `group-color` - Fallback color based on primary group
+- Standard prefix/suffix with full MiniMessage formatting
+
+## Version 2.4 (June 6, 2025)
+
+### New Features
+- **Network Join/Leave Configuration**: Added comprehensive network messaging system
+  - `broadcast_join_to_all_servers` - Control network-wide join message broadcasting
+  - `broadcast_leave_to_all_servers` - Control network-wide leave message broadcasting
+  - `show_server_transfers` - Optional notifications for server transfers
+  - Custom message formats for network join/leave events
+
+- **Discord Name Format Options**: Enhanced Discord integration
+  - `name_format` setting - Choose between "username" or "displayname"
+  - `message_format` setting - Customizable Discord-to-game message format
+  - Support for Discord display names vs usernames
+
+### Configuration Updates
+- Added `network` section to `discord_config.yml`
+- All new features are fully configurable via YAML
+- Enhanced MiniMessage format support for all message types
+
+### Technical Improvements
+- Updated configuration loading system
+- Enhanced Discord message handling
+- Improved network broadcasting functionality
+
 ## Version 2.3 (June 5, 2025)
+
+### Breaking Changes
+- **Removed Chat Filter System**: Complete removal of chat filtering functionality
+  - Deleted `ChatFilterCommand.java` and `ChatFilterModule.java`
+  - Removed all filter configuration files and directories
+  - Removed filter-related documentation
+  - Simplified Discord integration to remove filter dependencies
+
+### Changes
+- Simplified main plugin class by removing chat filter initialization
+- Updated Discord configuration to remove filter-related settings
+- Streamlined event handling without filter checks
+- Removed unused LuckPerms imports and dependencies
+- Updated documentation to focus on rules system and Discord integration
+- Preserved SnakeYAML dependency for Discord configuration
+
+### Current Features
+- **Discord Integration**: Full chat bridging with MiniMessage support
+- **Rules System**: Comprehensive server rules management
+- **Lobby Commands**: `/lobby`, `/l`, `/hub` teleportation
+- **Administrative Tools**: Configuration reload capabilities
+
+## Version 2.2 (Previous)
+- Discord Integration enhancements
+- Rules System implementation
+- Chat Filter functionality (now removed)
+- Server management improvements
+
+## Version 2.1 (Previous)
+- Initial Rules System
+- MiniMessage support
+- Admin commands
+- JSON-based configuration
 
 ### Breaking Changes
 - **Removed Chat Filter System**: Complete removal of chat filtering functionality

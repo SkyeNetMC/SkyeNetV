@@ -23,6 +23,17 @@ public class DiscordConfig {
     private boolean enableJoinLeave = true;
     private boolean enableServerSwitch = true;
     
+    // Network join/leave configuration
+    private boolean broadcastJoinToAllServers = true;
+    private boolean broadcastLeaveToAllServers = true;
+    private boolean showServerTransfers = false;
+    private String networkJoinFormat = "<green>✅ <bold>{player}</bold> joined the network!</green>";
+    private String networkLeaveFormat = "<red>❌ <bold>{player}</bold> left the network!</red>";
+    
+    // Discord name format configuration
+    private String discordNameFormat = "username"; // "username" or "displayname"
+    private String discordMessageFormat = "<gray>[Discord]</gray> <white><bold>{name}</bold>:</white> {message}";
+    
     // MiniMessage formats
     private String joinMessage = "<green>✅ <bold>{player}</bold> joined the network!</green>";
     private String leaveMessage = "<red>❌ <bold>{player}</bold> left the network!</red>";
@@ -59,6 +70,17 @@ public class DiscordConfig {
             enableJoinLeave = getBoolean("discord.enable_join_leave", enableJoinLeave);
             enableServerSwitch = getBoolean("discord.enable_server_switch", enableServerSwitch);
             
+            // Load network configuration
+            broadcastJoinToAllServers = getBoolean("network.broadcast_join_to_all_servers", broadcastJoinToAllServers);
+            broadcastLeaveToAllServers = getBoolean("network.broadcast_leave_to_all_servers", broadcastLeaveToAllServers);
+            showServerTransfers = getBoolean("network.show_server_transfers", showServerTransfers);
+            networkJoinFormat = getString("network.join_format", networkJoinFormat);
+            networkLeaveFormat = getString("network.leave_format", networkLeaveFormat);
+            
+            // Load Discord name format configuration
+            discordNameFormat = getString("discord.name_format", discordNameFormat);
+            discordMessageFormat = getString("discord.message_format", discordMessageFormat);
+            
             // Load MiniMessage formats
             joinMessage = getString("messages.join", joinMessage);
             leaveMessage = getString("messages.leave", leaveMessage);
@@ -94,6 +116,29 @@ public class DiscordConfig {
                   
                   # Enable server switch notifications
                   enable_server_switch: true
+                  
+                  # Discord name format for messages sent from Discord to game
+                  # Options: "username" or "displayname"
+                  name_format: "username"
+                  
+                  # Format for Discord messages sent to game (variables: {name}, {message})
+                  message_format: "<gray>[Discord]</gray> <white><bold>{name}</bold>:</white> {message}"
+                
+                network:
+                  # Broadcast join messages to all servers in the network
+                  broadcast_join_to_all_servers: true
+                  
+                  # Broadcast leave messages to all servers in the network
+                  broadcast_leave_to_all_servers: true
+                  
+                  # Show when players transfer between servers
+                  show_server_transfers: false
+                  
+                  # Network join message format (variables: {player})
+                  join_format: "<green>✅ <bold>{player}</bold> joined the network!</green>"
+                  
+                  # Network leave message format (variables: {player})
+                  leave_format: "<red>❌ <bold>{player}</bold> left the network!</red>"
                 
                 messages:
                   # Player join message (variables: {player})
@@ -168,6 +213,17 @@ public class DiscordConfig {
     public boolean isShowPrefixes() { return showPrefixes; }
     public boolean isEnableJoinLeave() { return enableJoinLeave; }
     public boolean isEnableServerSwitch() { return enableServerSwitch; }
+    
+    // Network configuration getters
+    public boolean isBroadcastJoinToAllServers() { return broadcastJoinToAllServers; }
+    public boolean isBroadcastLeaveToAllServers() { return broadcastLeaveToAllServers; }
+    public boolean isShowServerTransfers() { return showServerTransfers; }
+    public String getNetworkJoinFormat() { return networkJoinFormat; }
+    public String getNetworkLeaveFormat() { return networkLeaveFormat; }
+    
+    // Discord name format getters
+    public String getDiscordNameFormat() { return discordNameFormat; }
+    public String getDiscordMessageFormat() { return discordMessageFormat; }
     
     public String getJoinMessage() { return joinMessage; }
     public String getLeaveMessage() { return leaveMessage; }

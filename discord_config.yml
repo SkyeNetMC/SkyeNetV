@@ -16,6 +16,29 @@ discord:
   
   # Enable server switch announcements
   enable_server_switch: true
+  
+  # Discord name format for messages sent from Discord to game
+  # Options: "username" or "displayname"
+  name_format: "username"
+  
+  # Format for Discord messages sent to game (variables: {name}, {message})
+  message_format: "<gray>[Discord]</gray> <white><bold>{name}</bold>:</white> {message}"
+
+network:
+  # Broadcast join messages to all servers in the network
+  broadcast_join_to_all_servers: true
+  
+  # Broadcast leave messages to all servers in the network
+  broadcast_leave_to_all_servers: true
+  
+  # Show when players transfer between servers
+  show_server_transfers: false
+  
+  # Network join message format (variables: {player})
+  join_format: "<green>✅ <bold>{player}</bold> joined the network!</green>"
+  
+  # Network leave message format (variables: {player})
+  leave_format: "<red>❌ <bold>{player}</bold> left the network!</red>"
 
 # Message formats using MiniMessage syntax
 messages:

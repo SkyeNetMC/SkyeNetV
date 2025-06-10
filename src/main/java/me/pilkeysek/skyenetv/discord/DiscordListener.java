@@ -6,17 +6,17 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import javax.annotation.Nonnull;
+
 public class DiscordListener extends ListenerAdapter {
-    private final SkyeNetV plugin;
     private final DiscordManager discordManager;
 
     public DiscordListener(SkyeNetV plugin, DiscordManager discordManager) {
-        this.plugin = plugin;
         this.discordManager = discordManager;
     }
 
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
+    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
         Message message = event.getMessage();
         User author = event.getAuthor();
 
@@ -26,7 +26,13 @@ public class DiscordListener extends ListenerAdapter {
         // Only handle messages from the configured chat channel
         if (!message.getChannel().getId().equals(discordManager.getChatChannel().getId())) return;
 
+        // Get display name from member if available
+        String displayName = null;
+        if (event.isFromGuild() && event.getMember() != null) {
+            displayName = event.getMember().getEffectiveName();
+        }
+
         // Broadcast the message to all players
-        discordManager.broadcastDiscordMessage(author.getName(), message.getContentDisplay());
+        discordManager.broadcastDiscordMessage(author.getName(), displayName, message.getContentDisplay());
     }
 }

@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
@@ -78,6 +77,11 @@ public class DiscordManager {
                 .replace("{from}", from != null ? from.getServerInfo().getName() : "Unknown")
                 .replace("{to}", to.getServerInfo().getName());
         
+        // Broadcast to network if enabled
+        if (discordConfig.isShowServerTransfers()) {
+            broadcastNetworkMessage(switchMessage, "server_switch");
+        }
+        
         // Convert to plain text for Discord
         Component messageComponent = miniMessage.deserialize(switchMessage);
         String discordMessage = plainSerializer.serialize(messageComponent);
@@ -93,9 +97,19 @@ public class DiscordManager {
     public void sendPlayerJoin(Player player) {
         if (chatChannel == null || !discordConfig.isEnableJoinLeave()) return;
 
-        // Use MiniMessage format from config
-        String joinMessage = discordConfig.getJoinMessage()
-                .replace("{player}", player.getUsername());
+        // Use network join message format from config if broadcasting to all servers
+        String joinMessage;
+        if (discordConfig.isBroadcastJoinToAllServers()) {
+            joinMessage = discordConfig.getNetworkJoinFormat()
+                    .replace("{player}", player.getUsername());
+            
+            // Broadcast to all servers
+            broadcastNetworkMessage(joinMessage, "join");
+        } else {
+            // Use regular join message
+            joinMessage = discordConfig.getJoinMessage()
+                    .replace("{player}", player.getUsername());
+        }
         
         // Convert to plain text for Discord
         Component messageComponent = miniMessage.deserialize(joinMessage);
@@ -112,9 +126,19 @@ public class DiscordManager {
     public void sendPlayerLeave(Player player) {
         if (chatChannel == null || !discordConfig.isEnableJoinLeave()) return;
 
-        // Use MiniMessage format from config
-        String leaveMessage = discordConfig.getLeaveMessage()
-                .replace("{player}", player.getUsername());
+        // Use network leave message format from config if broadcasting to all servers
+        String leaveMessage;
+        if (discordConfig.isBroadcastLeaveToAllServers()) {
+            leaveMessage = discordConfig.getNetworkLeaveFormat()
+                    .replace("{player}", player.getUsername());
+            
+            // Broadcast to all servers
+            broadcastNetworkMessage(leaveMessage, "leave");
+        } else {
+            // Use regular leave message
+            leaveMessage = discordConfig.getLeaveMessage()
+                    .replace("{player}", player.getUsername());
+        }
         
         // Convert to plain text for Discord
         Component messageComponent = miniMessage.deserialize(leaveMessage);
@@ -128,13 +152,29 @@ public class DiscordManager {
         chatChannel.sendMessageEmbeds(embed.build()).queue();
     }
 
-    public void broadcastDiscordMessage(String author, String message) {
-        Component component = Component.text()
-                .append(Component.text("Discord", NamedTextColor.BLUE))
-                .append(Component.text(" " + author + " » ", NamedTextColor.GRAY))
-                .append(Component.text(message, NamedTextColor.WHITE))
-                .build();
+    public void broadcastDiscordMessage(String author, String displayName, String message) {
+        // Use the configured name format
+        String nameToUse;
+        if ("displayname".equals(discordConfig.getDiscordNameFormat())) {
+            nameToUse = displayName != null ? displayName : author;
+        } else {
+            nameToUse = author;
+        }
+        
+        // Use the configured message format
+        String formattedMessage = discordConfig.getDiscordMessageFormat()
+                .replace("{name}", nameToUse)
+                .replace("{message}", message);
+        
+        Component component = miniMessage.deserialize(formattedMessage);
 
+        plugin.getServer().getAllPlayers().forEach(player -> 
+            player.sendMessage(component));
+    }
+    
+    private void broadcastNetworkMessage(String message, String type) {
+        Component component = miniMessage.deserialize(message);
+        
         plugin.getServer().getAllPlayers().forEach(player -> 
             player.sendMessage(component));
     }
