@@ -17,6 +17,15 @@ discord:
   # Enable server switch announcements
   enable_server_switch: true
   
+  # Only send global chat messages to Discord (if false, all chat goes to Discord)
+  only_global_chat_to_discord: true
+  
+  # List of servers where global chat is disabled and messages stay local
+  disabled_servers:
+    - "lobby"
+    - "hub"
+    # Add more server names as needed
+  
   # Discord name format for messages sent from Discord to game
   # Options: "username" or "displayname"
   name_format: "username"

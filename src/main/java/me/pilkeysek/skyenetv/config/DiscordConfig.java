@@ -23,6 +23,10 @@ public class DiscordConfig {
     private boolean enableJoinLeave = true;
     private boolean enableServerSwitch = true;
     
+    // Global chat Discord integration
+    private boolean onlyGlobalChatToDiscord = true;
+    private java.util.List<String> disabledServers = new java.util.ArrayList<>();
+    
     // Network join/leave configuration
     private boolean broadcastJoinToAllServers = true;
     private boolean broadcastLeaveToAllServers = true;
@@ -77,6 +81,10 @@ public class DiscordConfig {
             networkJoinFormat = getString("network.join_format", networkJoinFormat);
             networkLeaveFormat = getString("network.leave_format", networkLeaveFormat);
             
+            // Load global chat Discord integration settings
+            onlyGlobalChatToDiscord = getBoolean("discord.only_global_chat_to_discord", onlyGlobalChatToDiscord);
+            disabledServers = getList("discord.disabled_servers", disabledServers);
+            
             // Load Discord name format configuration
             discordNameFormat = getString("discord.name_format", discordNameFormat);
             discordMessageFormat = getString("discord.message_format", discordMessageFormat);
@@ -116,6 +124,14 @@ public class DiscordConfig {
                   
                   # Enable server switch notifications
                   enable_server_switch: true
+                  
+                  # Only send global chat messages to Discord (if false, all chat goes to Discord)
+                  only_global_chat_to_discord: true
+                  
+                  # List of servers where global chat is disabled and messages stay local
+                  disabled_servers:
+                    - "example-server"
+                    # Add more server names as needed
                   
                   # Discord name format for messages sent from Discord to game
                   # Options: "username" or "displayname"
@@ -207,6 +223,15 @@ public class DiscordConfig {
         return defaultValue;
     }
     
+    @SuppressWarnings("unchecked")
+    private java.util.List<String> getList(String path, java.util.List<String> defaultValue) {
+        Object value = getNestedValue(config, path);
+        if (value instanceof java.util.List) {
+            return (java.util.List<String>) value;
+        }
+        return defaultValue;
+    }
+    
     // Getters
     public String getToken() { return token; }
     public String getChannelId() { return channelId; }
@@ -220,6 +245,10 @@ public class DiscordConfig {
     public boolean isShowServerTransfers() { return showServerTransfers; }
     public String getNetworkJoinFormat() { return networkJoinFormat; }
     public String getNetworkLeaveFormat() { return networkLeaveFormat; }
+    
+    // Global chat Discord integration getters
+    public boolean isOnlyGlobalChatToDiscord() { return onlyGlobalChatToDiscord; }
+    public java.util.List<String> getDisabledServers() { return disabledServers; }
     
     // Discord name format getters
     public String getDiscordNameFormat() { return discordNameFormat; }

@@ -33,15 +33,31 @@ public class DiscordManager {
 
     private void initialize() {
         try {
+            plugin.getLogger().info("Initializing Discord bot with token: {}...", 
+                discordConfig.getToken().substring(0, Math.min(10, discordConfig.getToken().length())) + "...");
+            
             jda = JDABuilder.createDefault(discordConfig.getToken())
                     .build()
                     .awaitReady();
             
+            plugin.getLogger().info("JDA initialized, looking for channel ID: {}", discordConfig.getChannelId());
+            
             chatChannel = jda.getTextChannelById(discordConfig.getChannelId());
             if (chatChannel == null) {
-                plugin.getLogger().error("Could not find Discord channel with ID: " + discordConfig.getChannelId());
+                plugin.getLogger().error("Could not find Discord channel with ID: {}", discordConfig.getChannelId());
+                plugin.getLogger().error("Available channels:");
+                jda.getTextChannels().forEach(channel -> 
+                    plugin.getLogger().error("  - {} (ID: {})", channel.getName(), channel.getId()));
                 return;
             }
+            
+            plugin.getLogger().info("Found Discord channel: {} (ID: {})", chatChannel.getName(), chatChannel.getId());
+            
+            // Register the Discord listener after JDA is ready
+            jda.addEventListener(new DiscordListener(plugin, this));
+            
+            // Send a test message to verify the connection
+            sendTestMessage();
             
             plugin.getLogger().info("Discord bot initialized successfully!");
         } catch (Exception e) {
@@ -153,23 +169,35 @@ public class DiscordManager {
     }
 
     public void broadcastDiscordMessage(String author, String displayName, String message) {
-        // Use the configured name format
-        String nameToUse;
-        if ("displayname".equals(discordConfig.getDiscordNameFormat())) {
-            nameToUse = displayName != null ? displayName : author;
-        } else {
-            nameToUse = author;
-        }
-        
-        // Use the configured message format
-        String formattedMessage = discordConfig.getDiscordMessageFormat()
-                .replace("{name}", nameToUse)
-                .replace("{message}", message);
-        
-        Component component = miniMessage.deserialize(formattedMessage);
+        try {
+            // Use the configured name format
+            String nameToUse;
+            if ("displayname".equals(discordConfig.getDiscordNameFormat())) {
+                nameToUse = displayName != null ? displayName : author;
+            } else {
+                nameToUse = author;
+            }
+            
+            // Use the configured message format
+            String formattedMessage = discordConfig.getDiscordMessageFormat()
+                    .replace("{name}", nameToUse)
+                    .replace("{message}", message);
+            
+            plugin.getLogger().info("Broadcasting formatted Discord message: {}", formattedMessage);
+            
+            Component component = miniMessage.deserialize(formattedMessage);
 
-        plugin.getServer().getAllPlayers().forEach(player -> 
-            player.sendMessage(component));
+            // Broadcast to all online players
+            int playerCount = 0;
+            for (Player player : plugin.getServer().getAllPlayers()) {
+                player.sendMessage(component);
+                playerCount++;
+            }
+            
+            plugin.getLogger().info("Sent Discord message to {} online players", playerCount);
+        } catch (Exception e) {
+            plugin.getLogger().error("Error broadcasting Discord message to Minecraft", e);
+        }
     }
     
     private void broadcastNetworkMessage(String message, String type) {
@@ -191,5 +219,20 @@ public class DiscordManager {
     
     public TextChannel getChatChannel() {
         return chatChannel;
+    }
+    
+    public boolean isConnected() {
+        return jda != null && jda.getStatus() == JDA.Status.CONNECTED && chatChannel != null;
+    }
+    
+    public void sendTestMessage() {
+        if (chatChannel != null) {
+            chatChannel.sendMessage("🔧 **Discord integration test** - SkyeNetV plugin loaded successfully!").queue(
+                success -> plugin.getLogger().info("Test message sent to Discord successfully"),
+                error -> plugin.getLogger().error("Failed to send test message to Discord: {}", error.getMessage())
+            );
+        } else {
+            plugin.getLogger().error("Cannot send test message - chat channel is null");
+        }
     }
 }
