@@ -65,7 +65,7 @@ public class SkyeNetV {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         CommandManager commandManager = server.getCommandManager();
-        globalChatCommand = new GlobalChatCommand();
+        globalChatCommand = new GlobalChatCommand(this);
         
         commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand(this));
         commandManager.register(commandManager.metaBuilder("lobby").aliases("l", "hub").plugin(this).build(), new LobbyCommand(server));
@@ -140,12 +140,15 @@ public class SkyeNetV {
                         .build();
             }
             
-            // Send to all players who should receive global messages
+            // Send to all players who should receive global messages (including sender)
             for (Player onlinePlayer : server.getAllPlayers()) {
-                if (globalChatCommand.shouldReceiveGlobalMessages(onlinePlayer) && !onlinePlayer.equals(player)) {
+                if (globalChatCommand.shouldReceiveGlobalMessages(onlinePlayer)) {
                     onlinePlayer.sendMessage(globalChatMessage);
                 }
             }
+            
+            // Cancel the original event to prevent duplication
+            event.setResult(PlayerChatEvent.ChatResult.denied());
         }
         
         // Handle Discord integration with new logic
@@ -189,8 +192,18 @@ public class SkyeNetV {
 
     @Subscribe
     public void onPlayerJoin(PostLoginEvent event) {
+        Player player = event.getPlayer();
+        
         if (discordManager != null) {
-            discordManager.sendPlayerJoin(event.getPlayer());
+            discordManager.sendPlayerJoin(player);
+        }
+        
+        // Send global chat notification if global chat is disabled
+        if (globalChatCommand != null && !globalChatCommand.isGlobalChatEnabled(player)) {
+            // Delay the notification slightly so it appears after join messages
+            server.getScheduler().buildTask(this, () -> {
+                globalChatCommand.sendGlobalChatDisabledNotification(player);
+            }).delay(1, java.util.concurrent.TimeUnit.SECONDS).schedule();
         }
     }
 

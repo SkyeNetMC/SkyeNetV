@@ -1,7 +1,7 @@
 {
     "id": "skyenetv",
     "name": "SkyeNet Velocity Plugin",
-    "version": "2.4.4",
+    "version": "2.4.5",
     "description": "Utilities for SkyeNet Velocity ProxyServer",
     "url": "https://skyenet.co.in",
     "authors": ["NobleSKye", "PilkeySEK", "SkyeNetwork Team"],

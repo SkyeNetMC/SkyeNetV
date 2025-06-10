@@ -1,5 +1,30 @@
 # Changelog
 
+## Version 2.4.5 (June 10, 2025)
+
+### Global Chat Enhancements
+- **Join Notifications**: New players receive a notification when connecting with global chat disabled
+  - Message: "You are not connected to global chat. Type `/gc` to toggle."
+  - Clickable `/gc` command for easy activation
+  - Appears 1 second after joining to avoid interference with join messages
+- **Global Chat Join/Leave Messages**: Enhanced broadcast system for global chat status changes
+  - Join message: `🌐 [Prefix] PlayerName [Suffix] joined global chat` (green text)
+  - Leave message: `🌐 [Prefix] PlayerName [Suffix] left global chat` (red text)  
+  - Messages include **full LuckPerms formatting** (prefix, colored names, suffix)
+  - Only visible to players who can receive global messages
+- **Improved User Experience**: Better onboarding for new players to understand global chat system
+
+### Technical Improvements
+- Added `broadcastGlobalChatJoinMessage()` and `broadcastGlobalChatLeaveMessage()` methods
+- Enhanced `GlobalChatCommand` with plugin reference for better integration
+- Updated join event handler with delayed notification system
+- All global chat status changes now broadcast to eligible players
+
+### Message Duplication Fix
+- **Fixed chat duplication issue**: Messages no longer appear twice when global chat is enabled
+- **Proper event handling**: Original chat events are now properly cancelled when global chat broadcasts
+- **Discord integration preserved**: All Discord functionality remains intact
+
 ## Version 2.4.4 (June 10, 2025)
 
 ### Local Chat Improvements

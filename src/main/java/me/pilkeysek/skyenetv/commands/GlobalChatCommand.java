@@ -2,6 +2,8 @@ package me.pilkeysek.skyenetv.commands;
 
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
+import me.pilkeysek.skyenetv.SkyeNetV;
+import me.pilkeysek.skyenetv.utils.PrefixUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -13,6 +15,7 @@ import java.util.*;
 public class GlobalChatCommand implements SimpleCommand {
     private final Set<UUID> globalChatPlayers = new HashSet<>();
     private final Map<UUID, GlobalChatSettings> playerSettings = new HashMap<>();
+    private final SkyeNetV plugin;
 
     public static class GlobalChatSettings {
         private boolean enabled = false;
@@ -33,8 +36,8 @@ public class GlobalChatCommand implements SimpleCommand {
         public void setSendMessages(boolean sendMessages) { this.sendMessages = sendMessages; }
     }
 
-    public GlobalChatCommand() {
-        // Constructor no longer needs plugin parameter
+    public GlobalChatCommand(SkyeNetV plugin) {
+        this.plugin = plugin;
     }
 
     @Override
@@ -55,8 +58,12 @@ public class GlobalChatCommand implements SimpleCommand {
             settings.setEnabled(!settings.isEnabled());
             if (settings.isEnabled()) {
                 globalChatPlayers.add(playerId);
+                // Broadcast join message to all players who can receive global messages
+                broadcastGlobalChatJoinMessage(player);
             } else {
                 globalChatPlayers.remove(playerId);
+                // Broadcast leave message to all players who can receive global messages
+                broadcastGlobalChatLeaveMessage(player);
             }
             
             String status = settings.isEnabled() ? "enabled" : "disabled";
@@ -206,6 +213,62 @@ public class GlobalChatCommand implements SimpleCommand {
     
     public GlobalChatSettings getPlayerSettings(UUID playerId) {
         return playerSettings.get(playerId);
+    }
+    
+    /**
+     * Broadcast a join message when a player enables global chat
+     */
+    public void broadcastGlobalChatJoinMessage(Player player) {
+        Component formattedName = PrefixUtils.getFullFormattedName(player);
+        
+        Component joinMessage = Component.text()
+                .append(Component.text("🌐 ", NamedTextColor.GOLD))
+                .append(formattedName)
+                .append(Component.text(" joined global chat", NamedTextColor.GREEN))
+                .build();
+        
+        // Send to all players who can receive global messages
+        for (Player onlinePlayer : plugin.getServer().getAllPlayers()) {
+            if (shouldReceiveGlobalMessages(onlinePlayer)) {
+                onlinePlayer.sendMessage(joinMessage);
+            }
+        }
+    }
+    
+    /**
+     * Broadcast a leave message when a player disables global chat
+     */
+    public void broadcastGlobalChatLeaveMessage(Player player) {
+        Component formattedName = PrefixUtils.getFullFormattedName(player);
+        
+        Component leaveMessage = Component.text()
+                .append(Component.text("🌐 ", NamedTextColor.GOLD))
+                .append(formattedName)
+                .append(Component.text(" left global chat", NamedTextColor.RED))
+                .build();
+        
+        // Send to all players who can receive global messages
+        for (Player onlinePlayer : plugin.getServer().getAllPlayers()) {
+            if (shouldReceiveGlobalMessages(onlinePlayer)) {
+                onlinePlayer.sendMessage(leaveMessage);
+            }
+        }
+    }
+    
+    /**
+     * Send notification to player when they connect with global chat disabled
+     */
+    public void sendGlobalChatDisabledNotification(Player player) {
+        Component notification = Component.text()
+                .append(Component.text("You are not connected to global chat. Type ", NamedTextColor.GREEN))
+                .append(Component.text("/gc", NamedTextColor.GOLD)
+                        .decoration(TextDecoration.BOLD, true)
+                        .clickEvent(ClickEvent.runCommand("/gc"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to toggle global chat"))))
+                .append(Component.text(" to toggle.", NamedTextColor.GREEN))
+                .build();
+        
+        player.sendMessage(notification);
     }
 
     @Override
