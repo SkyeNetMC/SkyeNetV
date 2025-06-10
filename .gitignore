@@ -1,6 +1,33 @@
 # User-specific stuff
 .idea/
 
+# Maven build files
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# IDE specific files
+*.iml
+.settings/
+.classpath
+.project
+.vscode/
+
+# Test files
+**/test/
+**/tests/
+**/*Test.java
+**/*Tests.java
+*Test.java
+*Tests.java
+*TestCase.java
+
+# Backup files
+*.bak
+*.bak*
+
 *.iml
 *.ipr
 *.iws
@@ -117,3 +144,4 @@ runs/
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
+>>>>>>> master
