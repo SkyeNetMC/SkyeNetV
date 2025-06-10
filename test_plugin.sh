@@ -1,130 +1,95 @@
 #!/bin/bash
 
-# SkyeNetV Plugin Test Script
+# SkyeNetV Plugin Test Script - Version Agnostic
 # This script tests the core functionality of the plugin
+
+set -e  # Exit on error
 
 echo "=== SkyeNetV Plugin Test ==="
 
 # Find jar file dynamically
 JAR_FILE=$(ls target/SkyeNetV-*.jar 2>/dev/null | head -1)
-if [ -n "$JAR_FILE" ]; then
-    echo "Plugin JAR: $(ls -la $JAR_FILE)"
-    echo "Version: $(basename $JAR_FILE | sed 's/SkyeNetV-\(.*\)\.jar/\1/')"
-else
+if [ -z "$JAR_FILE" ]; then
     echo "❌ No SkyeNetV jar file found in target/"
+    echo "Available files in target/:"
+    ls -la target/ 2>/dev/null || echo "target/ directory not found"
     exit 1
 fi
+
+VERSION=$(basename "$JAR_FILE" | sed 's/SkyeNetV-\(.*\)\.jar/\1/')
+echo "✅ Found JAR: $JAR_FILE"
+echo "✅ Version: $VERSION"
+echo "✅ Size: $(du -h "$JAR_FILE" | cut -f1)"
 echo ""
 
-echo "=== JAR Contents Check ==="
-echo "Checking for velocity-plugin.json..."
-jar tf $JAR_FILE | grep velocity-plugin.json
+echo "=== JAR Contents Verification ==="
 
-echo ""
-echo "Checking for main class..."
-jar tf $JAR_FILE | grep "SkyeNetV.class"
-
-echo ""
-echo "Checking for all command classes..."
-jar tf $JAR_FILE | grep "commands.*\.class"
-
-echo ""
-echo "Checking for configuration classes..."
-jar tf $JAR_FILE | grep "config.*\.class"
-
-echo ""
-echo "Checking for utility classes..."
-jar tf $JAR_FILE | grep "utils.*\.class"
-
-echo ""
-echo "Checking for discord classes..."
-jar tf $JAR_FILE | grep "discord.*\.class"in Test Script
-# This script tests the core functionality of the plugin
-
-echo "=== SkyeNetV Plugin Test ==="
-echo "Plugin JAR: $(ls -la target/SkyeNetV-*.jar)"
-echo ""
-
-echo "=== JAR Contents Check ==="
-echo "Checking for velocity-plugin.json..."
-jar tf target/SkyeNetV-2.4.3.jar | grep velocity-plugin.json
-
-echo ""
-echo "Checking for main class..."
-jar tf target/SkyeNetV-2.4.3.jar | grep "SkyeNetV.class"
-
-echo ""
-echo "Checking for all command classes..."
-jar tf target/SkyeNetV-2.4.3.jar | grep "commands.*\.class"
-
-echo ""
-echo "Checking for configuration classes..."
-jar tf target/SkyeNetV-2.4.3.jar | grep "config.*\.class"
-
-echo ""
-echo "Checking for module classes..."
-jar tf target/SkyeNetV-2.4.3.jar | grep "modules.*\.class"
-
-echo ""
-echo "=== Configuration Files ==="
-echo "Discord config sample:"
-if [ -f discord_config.yml ]; then
-    echo "✅ discord_config.yml created"
+# Check for velocity-plugin.json
+if jar tf "$JAR_FILE" | grep -q "velocity-plugin.json"; then
+    echo "✅ velocity-plugin.json present"
 else
-    echo "❌ discord_config.yml missing"
+    echo "❌ velocity-plugin.json missing"
 fi
 
-echo ""
-echo "Rules configuration:"
-if [ -f src/main/resources/rules.json ]; then
-    echo "✅ rules.json present"
-else
-    echo "❌ rules.json missing"
-fi
-
-echo ""
-echo "=== Plugin Metadata ==="
-echo "Checking velocity-plugin.json content..."
-jar xf "$JAR_FILE" velocity-plugin.json 2>/dev/null
-if [ -f velocity-plugin.json ]; then
-    echo "Found velocity-plugin.json in $JAR_FILE:"
-    echo ""
-    echo "--- velocity-plugin.json ---"
-    cat velocity-plugin.json | python3 -m json.tool 2>/dev/null || cat velocity-plugin.json
-    echo ""
-    echo "--- end velocity-plugin.json ---"
-    rm velocity-plugin.json
-else
-    echo "❌ Could not extract velocity-plugin.json from $JAR_FILE"
-fi
-
-echo ""
-echo "=== Class Verification ==="
-echo "Verifying key classes exist:"
-
-# Check main classes
+# Check for main class
 if jar tf "$JAR_FILE" | grep -q "me/pilkeysek/skyenetv/SkyeNetV.class"; then
     echo "✅ Main plugin class found"
 else
     echo "❌ Main plugin class missing"
 fi
 
-# Check command classes
-COMMAND_COUNT=$(jar tf "$JAR_FILE" | grep "commands.*\.class" | wc -l)
-echo "✅ Found $COMMAND_COUNT command classes"
+# Count command classes
+COMMAND_COUNT=$(jar tf "$JAR_FILE" | grep -c "commands.*\.class" || echo "0")
+echo "✅ Command classes: $COMMAND_COUNT"
 
-# Check config classes
-CONFIG_COUNT=$(jar tf "$JAR_FILE" | grep "config.*\.class" | wc -l)
-echo "✅ Found $CONFIG_COUNT configuration classes"
+# Count config classes  
+CONFIG_COUNT=$(jar tf "$JAR_FILE" | grep -c "config.*\.class" || echo "0")
+echo "✅ Config classes: $CONFIG_COUNT"
+
+# Count utility classes
+UTIL_COUNT=$(jar tf "$JAR_FILE" | grep -c "utils.*\.class" || echo "0")
+echo "✅ Utility classes: $UTIL_COUNT"
+
+# Count discord classes
+DISCORD_COUNT=$(jar tf "$JAR_FILE" | grep -c "discord.*\.class" || echo "0")
+echo "✅ Discord classes: $DISCORD_COUNT"
 
 echo ""
-echo "=== Version Information ==="
-VERSION=$(basename $JAR_FILE | sed 's/SkyeNetV-\(.*\)\.jar/\1/')
-echo "Plugin Version: $VERSION"
-echo "JAR File Size: $(du -h $JAR_FILE | cut -f1)"
-echo "Build Date: $(stat -c %y $JAR_FILE | cut -d' ' -f1)"
+echo "=== Configuration Files ==="
+
+if [ -f "discord_config.yml" ]; then
+    echo "✅ discord_config.yml exists"
+else
+    echo "❌ discord_config.yml missing"
+fi
+
+if [ -f "src/main/resources/rules.json" ]; then
+    echo "✅ rules.json exists"
+else
+    echo "❌ rules.json missing"
+fi
 
 echo ""
-echo "=== Test Complete ==="
-echo "Plugin JAR: $JAR_FILE"
-echo "Status: ✅ Ready for deployment!"
+echo "=== Plugin Metadata ==="
+
+# Extract and display velocity-plugin.json
+if jar xf "$JAR_FILE" velocity-plugin.json 2>/dev/null; then
+    echo "velocity-plugin.json content:"
+    echo "---"
+    cat velocity-plugin.json
+    echo ""
+    echo "---"
+    rm -f velocity-plugin.json
+else
+    echo "❌ Could not extract velocity-plugin.json"
+fi
+
+echo ""
+echo "=== Summary ==="
+echo "Plugin: SkyeNetV $VERSION"
+echo "JAR File: $JAR_FILE"
+echo "Status: ✅ Ready for deployment"
+echo ""
+echo "To deploy:"
+echo "  cp $JAR_FILE /path/to/velocity/plugins/"
+echo "  # Restart Velocity server"
