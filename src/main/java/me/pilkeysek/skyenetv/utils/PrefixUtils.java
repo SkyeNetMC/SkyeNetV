@@ -145,6 +145,53 @@ public class PrefixUtils {
     }
 
     /**
+     * Create a fully formatted player name using MiniMessage format that preserves gradient/color continuation
+     * This method parses the entire prefix+name+suffix as a single MiniMessage string to preserve gradients
+     * @param player The player to format
+     * @return Formatted component with proper color continuation
+     */
+    public static Component getFullFormattedNameWithColorContinuation(Player player) {
+        if (luckPerms == null) {
+            return Component.text(player.getUsername());
+        }
+
+        try {
+            User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+            if (user == null) {
+                return Component.text(player.getUsername());
+            }
+
+            CachedMetaData metaData = user.getCachedData().getMetaData();
+            
+            // Get raw prefix and suffix
+            String prefix = metaData.getPrefix();
+            String suffix = metaData.getSuffix();
+            
+            // Build a complete MiniMessage string that preserves color continuations
+            StringBuilder fullFormat = new StringBuilder();
+            
+            if (prefix != null && !prefix.isEmpty()) {
+                fullFormat.append(prefix);
+            }
+            
+            // Add the player name - this will inherit colors from prefix if no explicit color is set
+            fullFormat.append(player.getUsername());
+            
+            if (suffix != null && !suffix.isEmpty()) {
+                fullFormat.append(suffix);
+            }
+            
+            // Parse the entire string as MiniMessage to preserve gradients and color continuations
+            return miniMessage.deserialize(fullFormat.toString());
+            
+        } catch (Exception e) {
+            logger.warn("Failed to get formatted name with color continuation for player {}: {}", player.getUsername(), e.getMessage());
+        }
+
+        return Component.text(player.getUsername());
+    }
+
+    /**
      * Check if LuckPerms is available
      * @return true if LuckPerms is loaded and available
      */

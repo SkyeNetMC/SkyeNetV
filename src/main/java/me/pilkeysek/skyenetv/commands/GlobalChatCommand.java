@@ -219,13 +219,19 @@ public class GlobalChatCommand implements SimpleCommand {
      * Broadcast a join message when a player enables global chat
      */
     public void broadcastGlobalChatJoinMessage(Player player) {
-        Component formattedName = PrefixUtils.getFullFormattedName(player);
+        // Get the join message format from configuration
+        String joinMessageFormat = plugin.getDiscordConfig().getGlobalChatJoinMessage();
         
-        Component joinMessage = Component.text()
-                .append(Component.text("🌐 ", NamedTextColor.GOLD))
-                .append(formattedName)
-                .append(Component.text(" joined global chat", NamedTextColor.GREEN))
-                .build();
+        // Get the full formatted name with color continuation for prefix
+        String playerPrefix = PrefixUtils.getPlayerPrefixText(player);
+        
+        // Replace placeholders in the message format
+        String processedMessage = joinMessageFormat
+                .replace("{player}", player.getUsername())
+                .replace("{luckperms_prefix}", playerPrefix);
+        
+        // Parse as MiniMessage
+        Component joinMessage = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(processedMessage);
         
         // Send to all players who can receive global messages
         for (Player onlinePlayer : plugin.getServer().getAllPlayers()) {
@@ -239,13 +245,19 @@ public class GlobalChatCommand implements SimpleCommand {
      * Broadcast a leave message when a player disables global chat
      */
     public void broadcastGlobalChatLeaveMessage(Player player) {
-        Component formattedName = PrefixUtils.getFullFormattedName(player);
+        // Get the leave message format from configuration
+        String leaveMessageFormat = plugin.getDiscordConfig().getGlobalChatLeaveMessage();
         
-        Component leaveMessage = Component.text()
-                .append(Component.text("🌐 ", NamedTextColor.GOLD))
-                .append(formattedName)
-                .append(Component.text(" left global chat", NamedTextColor.RED))
-                .build();
+        // Get the player prefix
+        String playerPrefix = PrefixUtils.getPlayerPrefixText(player);
+        
+        // Replace placeholders in the message format
+        String processedMessage = leaveMessageFormat
+                .replace("{player}", player.getUsername())
+                .replace("{luckperms_prefix}", playerPrefix);
+        
+        // Parse as MiniMessage
+        Component leaveMessage = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(processedMessage);
         
         // Send to all players who can receive global messages
         for (Player onlinePlayer : plugin.getServer().getAllPlayers()) {
@@ -259,14 +271,13 @@ public class GlobalChatCommand implements SimpleCommand {
      * Send notification to player when they connect with global chat disabled
      */
     public void sendGlobalChatDisabledNotification(Player player) {
-        Component notification = Component.text()
-                .append(Component.text("You are not connected to global chat. Type ", NamedTextColor.GREEN))
-                .append(Component.text("/gc", NamedTextColor.GOLD)
-                        .decoration(TextDecoration.BOLD, true)
-                        .clickEvent(ClickEvent.runCommand("/gc"))
-                        .hoverEvent(HoverEvent.showText(Component.text("Click to toggle global chat"))))
-                .append(Component.text(" to toggle.", NamedTextColor.GREEN))
-                .build();
+        // Get the notification message format from configuration
+        String notificationFormat = plugin.getDiscordConfig().getGlobalChatNewPlayerNotification();
+        
+        // Parse as MiniMessage with click event
+        Component notification = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(notificationFormat)
+                .clickEvent(ClickEvent.runCommand("/gc"))
+                .hoverEvent(HoverEvent.showText(Component.text("Click to toggle global chat")));
         
         player.sendMessage(notification);
     }

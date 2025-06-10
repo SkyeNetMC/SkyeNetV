@@ -32,7 +32,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.nio.file.Path;
 
-@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "2.4.3",
+@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "2.4.6",
         url = "skye.host", description = "Utilities for SkyeNet Velocity ProxyServer (smth like that)", authors = {"PilkeySEK"})
 public class SkyeNetV {
 
@@ -102,42 +102,39 @@ public class SkyeNetV {
         if (player.getCurrentServer().isPresent() && globalChatCommand.shouldSendGlobalMessages(player)) {
             String serverName = player.getCurrentServer().get().getServerInfo().getName();
             
-            // Create global chat message with enhanced formatting
-            Component globalChatMessage;
-            
-            // Add globe icon if player has it enabled
+            // Get the appropriate message format from configuration
+            String messageFormat;
             if (globalChatCommand.shouldShowIcon(player)) {
-                Component globeIcon = Component.text("🌐 ", NamedTextColor.GOLD)
-                        .hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(
-                                Component.text()
-                                        .append(Component.text("Global Chat", NamedTextColor.GOLD, net.kyori.adventure.text.format.TextDecoration.BOLD))
-                                        .append(Component.newline())
-                                        .append(Component.text("Server: ", NamedTextColor.GRAY))
-                                        .append(Component.text(serverName, NamedTextColor.YELLOW))
-                                        .append(Component.newline())
-                                        .append(Component.text("Player: ", NamedTextColor.GRAY))
-                                        .append(Component.text(player.getUsername(), NamedTextColor.WHITE))
-                                        .build()
-                        ));
-                
-                // Add formatted player name with LuckPerms colors
-                Component formattedName = PrefixUtils.getFullFormattedName(player);
-                
-                globalChatMessage = Component.text()
-                        .append(globeIcon)
-                        .append(formattedName)
-                        .append(Component.text(": ", NamedTextColor.WHITE))
-                        .append(Component.text(message, NamedTextColor.WHITE))
-                        .build();
+                messageFormat = discordConfig.getGlobalChatMessageWithIcon();
             } else {
-                // No globe icon version
-                Component formattedName = PrefixUtils.getFullFormattedName(player);
-                
-                globalChatMessage = Component.text()
-                        .append(formattedName)
-                        .append(Component.text(": ", NamedTextColor.WHITE))
-                        .append(Component.text(message, NamedTextColor.WHITE))
+                messageFormat = discordConfig.getGlobalChatMessageWithoutIcon();
+            }
+            
+            // Get player prefix for replacement
+            String playerPrefix = PrefixUtils.getPlayerPrefixText(player);
+            
+            // Replace placeholders in the message format
+            String processedMessage = messageFormat
+                    .replace("{player}", player.getUsername())
+                    .replace("{luckperms_prefix}", playerPrefix)
+                    .replace("{message}", message);
+            
+            // Parse as MiniMessage to create the global chat message
+            Component globalChatMessage = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(processedMessage);
+            
+            // Add hover event for icon version
+            if (globalChatCommand.shouldShowIcon(player)) {
+                Component hoverText = Component.text()
+                        .append(Component.text("Global Chat", NamedTextColor.GOLD, net.kyori.adventure.text.format.TextDecoration.BOLD))
+                        .append(Component.newline())
+                        .append(Component.text("Server: ", NamedTextColor.GRAY))
+                        .append(Component.text(serverName, NamedTextColor.YELLOW))
+                        .append(Component.newline())
+                        .append(Component.text("Player: ", NamedTextColor.GRAY))
+                        .append(Component.text(player.getUsername(), NamedTextColor.WHITE))
                         .build();
+                
+                globalChatMessage = globalChatMessage.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(hoverText));
             }
             
             // Send to all players who should receive global messages (including sender)

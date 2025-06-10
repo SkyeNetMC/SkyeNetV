@@ -43,6 +43,7 @@ public class DiscordManager {
                 discordConfig.getToken().substring(0, Math.min(10, discordConfig.getToken().length())) + "...");
             
             jda = JDABuilder.createDefault(discordConfig.getToken())
+                    .enableIntents(net.dv8tion.jda.api.requests.GatewayIntent.MESSAGE_CONTENT)
                     .build()
                     .awaitReady();
             

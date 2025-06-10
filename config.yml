@@ -72,3 +72,20 @@ messages:
   
   # Chat message prefix
   chat_prefix: "<gray>[<blue>{server}</blue>]</gray> {luckperms_prefix}<white><bold>{player}</bold>:</white> "
+
+# Global Chat message formats (variables: {player}, {luckperms_prefix}, {server})
+global_chat:
+  # Main chat message format when globe icon is shown
+  message_with_icon: "🌐 {luckperms_prefix}<bold>{player}</bold>: {message}"
+  
+  # Main chat message format when globe icon is hidden
+  message_without_icon: "{luckperms_prefix}<bold>{player}</bold>: {message}"
+  
+  # Player joined global chat notification
+  join_message: "🌐 {luckperms_prefix}<bold>{player}</bold> <green>joined global chat</green>"
+  
+  # Player left global chat notification  
+  leave_message: "🌐 {luckperms_prefix}<bold>{player}</bold> <red>left global chat</red>"
+  
+  # New player notification (when they join server with global chat disabled)
+  new_player_notification: "<green>You are not connected to global chat. Type </green><gold><bold>/gc</bold></gold><green> to toggle.</green>"

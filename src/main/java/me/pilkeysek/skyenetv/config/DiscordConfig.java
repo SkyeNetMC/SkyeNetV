@@ -48,6 +48,13 @@ public class DiscordConfig {
     private String leaveMessage = "<red>❌ <bold>{player}</bold> left the network!</red>";
     private String serverSwitchMessage = "<yellow>🔄 <bold>{player}</bold> switched from <italic>{from}</italic> to <italic>{to}</italic></yellow>";
     private String chatPrefix = "<gray>[<blue>{server}</blue>]</gray> <white><bold>{player}</bold>:</white> ";
+
+    // Global Chat message formats
+    private String globalChatMessageWithIcon = "🌐 {luckperms_prefix}<bold>{player}</bold>: {message}";
+    private String globalChatMessageWithoutIcon = "{luckperms_prefix}<bold>{player}</bold>: {message}";
+    private String globalChatJoinMessage = "🌐 {luckperms_prefix}<bold>{player}</bold> <green>joined global chat</green>";
+    private String globalChatLeaveMessage = "🌐 {luckperms_prefix}<bold>{player}</bold> <red>left global chat</red>";
+    private String globalChatNewPlayerNotification = "<green>You are not connected to global chat. Type </green><gold><bold>/gc</bold></gold><green> to toggle.</green>";
     
     public DiscordConfig(Path dataDirectory, Logger logger) {
         this.dataDirectory = dataDirectory;
@@ -105,6 +112,13 @@ public class DiscordConfig {
             serverSwitchMessage = getString("messages.server_switch", serverSwitchMessage);
             chatPrefix = getString("messages.chat_prefix", chatPrefix);
             
+            // Load global chat message formats
+            globalChatMessageWithIcon = getString("global_chat.message_with_icon", globalChatMessageWithIcon);
+            globalChatMessageWithoutIcon = getString("global_chat.message_without_icon", globalChatMessageWithoutIcon);
+            globalChatJoinMessage = getString("global_chat.join_message", globalChatJoinMessage);
+            globalChatLeaveMessage = getString("global_chat.leave_message", globalChatLeaveMessage);
+            globalChatNewPlayerNotification = getString("global_chat.new_player_notification", globalChatNewPlayerNotification);
+            
             logger.info("Discord configuration loaded successfully!");
             
         } catch (Exception e) {
@@ -119,7 +133,7 @@ public class DiscordConfig {
                 # SkyeNetV Configuration
                 # Use MiniMessage format for colored text: https://docs.advntr.dev/minimessage/format.html
                 
-                discord:d
+                discord:
                   # Your Discord bot token (get from https://discord.com/developers/applications)
                   token: "YOUR_BOT_TOKEN_HERE"
                   
@@ -186,6 +200,23 @@ public class DiscordConfig {
                   
                   # Chat message prefix (variables: {server}, {player}, {luckperms_prefix})
                   chat_prefix: "<gray>[<blue>{server}</blue>]</gray> {luckperms_prefix}<white><bold>{player}</bold>:</white> "
+                
+                # Global Chat message formats (variables: {player}, {luckperms_prefix}, {server})
+                global_chat:
+                  # Main chat message format when globe icon is shown
+                  message_with_icon: "🌐 {luckperms_prefix}<bold>{player}</bold>: {message}"
+                  
+                  # Main chat message format when globe icon is hidden
+                  message_without_icon: "{luckperms_prefix}<bold>{player}</bold>: {message}"
+                  
+                  # Player joined global chat notification
+                  join_message: "🌐 {luckperms_prefix}<bold>{player}</bold> <green>joined global chat</green>"
+                  
+                  # Player left global chat notification  
+                  leave_message: "🌐 {luckperms_prefix}<bold>{player}</bold> <red>left global chat</red>"
+                  
+                  # New player notification (when they join server with global chat disabled)
+                  new_player_notification: "<green>You are not connected to global chat. Type </green><gold><bold>/gc</bold></gold><green> to toggle.</green>"
                 """;
             
             FileWriter writer = new FileWriter(configFile);
@@ -276,6 +307,13 @@ public class DiscordConfig {
     public String getLeaveMessage() { return leaveMessage; }
     public String getServerSwitchMessage() { return serverSwitchMessage; }
     public String getChatPrefix() { return chatPrefix; }
+    
+    // Global chat message format getters
+    public String getGlobalChatMessageWithIcon() { return globalChatMessageWithIcon; }
+    public String getGlobalChatMessageWithoutIcon() { return globalChatMessageWithoutIcon; }
+    public String getGlobalChatJoinMessage() { return globalChatJoinMessage; }
+    public String getGlobalChatLeaveMessage() { return globalChatLeaveMessage; }
+    public String getGlobalChatNewPlayerNotification() { return globalChatNewPlayerNotification; }
     
     // Bot activity getters
     public String getBotActivityStatus() { return botActivityStatus; }

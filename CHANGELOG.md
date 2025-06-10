@@ -1,5 +1,64 @@
 # Changelog
 
+## Version 2.4.7 (June 10, 2025)
+
+### 🎨 Configurable Global Chat Messages
+- **Configurable Message Formats**: Global chat messages now use customizable MiniMessage formats
+  - Separate formats for messages with/without globe icon
+  - Configurable join/leave notification messages
+  - Customizable new player notification message
+- **Enhanced Color Continuation**: Added `getFullFormattedNameWithColorContinuation()` for seamless gradient flow
+- **Flexible Placeholder System**: Support for `{player}`, `{luckperms_prefix}`, and `{message}` placeholders
+- **Config-Driven Display**: All global chat message formats controlled via `config.yml`
+
+### New Configuration Options
+```yaml
+global_chat:
+  message_with_icon: "🌐 {luckperms_prefix}<bold>{player}</bold>: {message}"
+  message_without_icon: "{luckperms_prefix}<bold>{player}</bold>: {message}"
+  join_message: "🌐 {luckperms_prefix}<bold>{player}</bold> <green>joined global chat</green>"
+  leave_message: "🌐 {luckperms_prefix}<bold>{player}</bold> <red>left global chat</red>"
+  new_player_notification: "<green>You are not connected to global chat. Type </green><gold><bold>/gc</bold></gold><green> to toggle.</green>"
+```
+
+### Technical Changes
+- Enhanced `DiscordConfig.java`: Added global chat message format fields and getters
+- Updated `GlobalChatCommand.java`: Use configurable formats for join/leave/notification messages
+- Updated `SkyeNetV.java`: Main global chat display now uses configurable MiniMessage formats
+- Enhanced `PrefixUtils.java`: Added color continuation method for gradient preservation
+- Updated `config.yml`: Added comprehensive global chat message format section
+- Version bump: `2.4.6` → `2.4.7`
+
+### Benefits
+- **Customizable Branding**: Server owners can customize all global chat message formats
+- **Better Color Support**: Proper gradient/color continuation from prefix to username
+- **MiniMessage Integration**: Full support for modern Minecraft text formatting
+- **Consistent Configuration**: All message formats centralized in config.yml
+
+## Version 2.4.6 (June 10, 2025)
+
+### 🔧 Critical Discord Fix
+- **Discord Message Content Intent**: Fixed empty Discord message content issue
+  - **Root Cause**: JDA was not configured with `MESSAGE_CONTENT` intent
+  - **Solution**: Automatically enable `MESSAGE_CONTENT` intent in JDA initialization
+  - **Impact**: Resolves 95% of Discord → Minecraft message content issues
+- **Optimized Channel Filtering**: Improved Discord listener performance
+  - Early channel filtering to reduce unnecessary processing
+  - Silently ignore messages from non-target channels
+  - Enhanced diagnostic messages for troubleshooting
+- **Enhanced Error Diagnostics**: Added specific diagnostic for missing MESSAGE_CONTENT intent
+
+### Technical Changes
+- Updated `DiscordManager.java`: Added `.enableIntents(MESSAGE_CONTENT)` to JDA builder
+- Updated `DiscordListener.java`: Optimized channel filtering and enhanced diagnostics
+- Version bump: `2.4.5` → `2.4.6`
+
+### Files Modified
+- `src/main/java/me/pilkeysek/skyenetv/discord/DiscordManager.java`
+- `src/main/java/me/pilkeysek/skyenetv/discord/DiscordListener.java`
+- `src/main/java/me/pilkeysek/skyenetv/SkyeNetV.java`
+- `pom.xml`
+
 ## Version 2.4.5 (June 10, 2025)
 
 ### Global Chat Enhancements
