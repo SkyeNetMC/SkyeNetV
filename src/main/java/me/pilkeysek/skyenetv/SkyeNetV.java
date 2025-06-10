@@ -13,12 +13,13 @@ import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.pilkeysek.skyenetv.config.RulesConfig;
 import me.pilkeysek.skyenetv.config.DiscordConfig;
 import me.pilkeysek.skyenetv.discord.DiscordManager;
-import me.pilkeysek.skyenetv.discord.DiscordListener;
 import me.pilkeysek.skyenetv.commands.DiscordCommand;
 import me.pilkeysek.skyenetv.commands.LobbyCommand;
+import me.pilkeysek.skyenetv.commands.LocalChatCommand;
 import me.pilkeysek.skyenetv.commands.RulesCommand;
 import me.pilkeysek.skyenetv.commands.SudoCommand;
 import me.pilkeysek.skyenetv.commands.GlobalChatCommand;
@@ -71,6 +72,7 @@ public class SkyeNetV {
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
         commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
         commandManager.register(commandManager.metaBuilder("gc").aliases("globalchat").plugin(this).build(), globalChatCommand);
+        commandManager.register(commandManager.metaBuilder("lc").aliases("localchat").plugin(this).build(), new LocalChatCommand(this));
 
         // Initialize LuckPerms integration
         PrefixUtils.initialize();
@@ -82,7 +84,6 @@ public class SkyeNetV {
         }
 
         discordManager = new DiscordManager(this, discordConfig);
-        discordManager.getJda().addEventListener(new DiscordListener(this, discordManager));
     }
 
     @Subscribe
@@ -147,13 +148,31 @@ public class SkyeNetV {
             }
         }
         
-        // Handle Discord integration
+        // Handle Discord integration with new logic
         if (discordManager != null && event.getPlayer().getCurrentServer().isPresent()) {
-            discordManager.sendChatMessage(
-                event.getPlayer(),
-                event.getMessage(),
-                event.getPlayer().getCurrentServer().get().getServer()
-            );
+            RegisteredServer currentServer = event.getPlayer().getCurrentServer().get().getServer();
+            String serverName = currentServer.getServerInfo().getName();
+            
+            // Check if server is in disabled list
+            if (discordConfig.getDisabledServers().contains(serverName)) {
+                logger.debug("Server {} is in disabled list, not sending to Discord", serverName);
+                return; // Don't send to Discord for disabled servers
+            }
+            
+            // Check if only global chat should go to Discord
+            if (discordConfig.isOnlyGlobalChatToDiscord()) {
+                // Only send to Discord if player has global chat enabled and is sending messages
+                if (globalChatCommand.shouldSendGlobalMessages(player)) {
+                    discordManager.sendChatMessage(player, message, currentServer);
+                    logger.debug("Sent global chat message to Discord from {}", player.getUsername());
+                } else {
+                    logger.debug("Player {} doesn't have global chat enabled, not sending to Discord", player.getUsername());
+                }
+            } else {
+                // Send all chat to Discord (original behavior)
+                discordManager.sendChatMessage(player, message, currentServer);
+                logger.debug("Sent regular chat message to Discord from {}", player.getUsername());
+            }
         }
     }
 
@@ -200,6 +219,10 @@ public class SkyeNetV {
     
     public GlobalChatCommand getGlobalChatCommand() {
         return globalChatCommand;
+    }
+    
+    public DiscordManager getDiscordManager() {
+        return discordManager;
     }
     
     public void reloadDiscordConfig() throws Exception {
