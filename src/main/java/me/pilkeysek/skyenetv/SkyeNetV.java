@@ -79,7 +79,7 @@ public class SkyeNetV {
 
         // Initialize Discord bot
         if (!discordConfig.isConfigured()) {
-            logger.warn("Please configure your Discord bot token and channel ID in discord_config.yml");
+            logger.warn("Please configure your Discord bot token and channel ID in config.yml");
             return;
         }
 
@@ -226,7 +226,7 @@ public class SkyeNetV {
     }
     
     public void reloadDiscordConfig() throws Exception {
-        logger.info("Reloading Discord configuration...");
+        logger.info("Reloading configuration...");
         
         // Load new configuration
         DiscordConfig newConfig = new DiscordConfig(dataDirectory, logger);
@@ -241,6 +241,6 @@ public class SkyeNetV {
         
         discordManager = new DiscordManager(this, discordConfig);
         
-        logger.info("Discord configuration reloaded successfully!");
+        logger.info("Configuration reloaded successfully!");
     }
 }

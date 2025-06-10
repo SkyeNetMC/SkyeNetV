@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 2.4.4 (June 10, 2025)
+
+### Local Chat Improvements
+- **Enhanced Local Chat Command**: `/lc` now sends messages to local chat without the "LOCAL" prefix
+  - Messages appear as normal chat format: `PlayerName: message`
+  - Maintains server-specific message routing (only visible to players on same server)
+  - Cleaner, more natural local chat experience
+  - No functional changes to Discord integration or global chat
+
+### Technical Changes
+- Updated version number to 2.4.4 for consistency
+- Modified `LocalChatCommand.java` to remove prefix formatting
+- All other features from 2.4.3 remain unchanged
+
 ## Version 2.4.3 (June 10, 2025)
 
 ### Maintenance Release

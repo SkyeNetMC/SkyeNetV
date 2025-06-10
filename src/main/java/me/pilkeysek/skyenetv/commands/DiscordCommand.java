@@ -34,15 +34,15 @@ public class DiscordCommand implements SimpleCommand {
         
         if (args[0].equalsIgnoreCase("reload")) {
             if (!source.hasPermission("skyenetv.discord.reload")) {
-                source.sendMessage(Component.text("You don't have permission to reload Discord configuration.", NamedTextColor.RED));
+                source.sendMessage(Component.text("You don't have permission to reload configuration.", NamedTextColor.RED));
                 return;
             }
             
             try {
                 plugin.reloadDiscordConfig();
-                source.sendMessage(Component.text("Discord configuration reloaded successfully!", NamedTextColor.GREEN));
+                source.sendMessage(Component.text("Configuration reloaded successfully!", NamedTextColor.GREEN));
             } catch (Exception e) {
-                source.sendMessage(Component.text("Failed to reload Discord configuration: " + e.getMessage(), NamedTextColor.RED));
+                source.sendMessage(Component.text("Failed to reload configuration: " + e.getMessage(), NamedTextColor.RED));
             }
         } else if (args[0].equalsIgnoreCase("test")) {
             if (!source.hasPermission("skyenetv.discord.admin")) {
@@ -91,7 +91,7 @@ public class DiscordCommand implements SimpleCommand {
                 .build());
         } else if (args[0].equalsIgnoreCase("servers")) {
             if (!source.hasPermission("skyenetv.discord.admin")) {
-                source.sendMessage(Component.text("You don't have permission to view Discord server settings.", NamedTextColor.RED));
+                source.sendMessage(Component.text("You don't have permission to view server settings.", NamedTextColor.RED));
                 return;
             }
             
@@ -116,7 +116,7 @@ public class DiscordCommand implements SimpleCommand {
             source.sendMessage(Component.text("Test message sent to Discord. Check the Discord channel!", NamedTextColor.GREEN));
         } else if (args[0].equalsIgnoreCase("status")) {
             if (!source.hasPermission("skyenetv.discord.admin")) {
-                source.sendMessage(Component.text("You don't have permission to view Discord status.", NamedTextColor.RED));
+                source.sendMessage(Component.text("You don't have permission to check Discord status.", NamedTextColor.RED));
                 return;
             }
             

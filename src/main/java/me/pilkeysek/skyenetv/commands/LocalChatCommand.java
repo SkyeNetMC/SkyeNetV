@@ -44,11 +44,8 @@ public class LocalChatCommand implements SimpleCommand {
         // Get formatted player name with prefix
         Component formattedName = PrefixUtils.getFullFormattedName(player);
         
-        // Create local chat message format
+        // Create normal chat message format (without LOCAL prefix)
         Component localChatMessage = Component.text()
-                .append(Component.text("[", NamedTextColor.GRAY))
-                .append(Component.text("LOCAL", NamedTextColor.YELLOW))
-                .append(Component.text("] ", NamedTextColor.GRAY))
                 .append(formattedName)
                 .append(Component.text(": ", NamedTextColor.WHITE))
                 .append(Component.text(message, NamedTextColor.WHITE))
@@ -68,7 +65,7 @@ public class LocalChatCommand implements SimpleCommand {
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        return true; // Available to all players
+        return true; // Available to all players     
     }
 
     @Override

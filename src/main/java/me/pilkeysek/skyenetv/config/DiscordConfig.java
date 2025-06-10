@@ -38,6 +38,11 @@ public class DiscordConfig {
     private String discordNameFormat = "username"; // "username" or "displayname"
     private String discordMessageFormat = "<gray>[Discord]</gray> <white><bold>{name}</bold>:</white> {message}";
     
+    // Bot activity configuration
+    private String botActivityStatus = "ONLINE";
+    private String botActivityType = "CUSTOM_STATUS";
+    private String botActivityText = "%online%/%max-players% - play.skyenet.co.in";
+    
     // MiniMessage formats
     private String joinMessage = "<green>✅ <bold>{player}</bold> joined the network!</green>";
     private String leaveMessage = "<red>❌ <bold>{player}</bold> left the network!</red>";
@@ -51,7 +56,7 @@ public class DiscordConfig {
     }
     
     private void loadConfig() {
-        File configFile = new File(dataDirectory.toFile(), "discord_config.yml");
+        File configFile = new File(dataDirectory.toFile(), "config.yml");
         
         if (!configFile.exists()) {
             createDefaultConfig(configFile);
@@ -89,6 +94,11 @@ public class DiscordConfig {
             discordNameFormat = getString("discord.name_format", discordNameFormat);
             discordMessageFormat = getString("discord.message_format", discordMessageFormat);
             
+            // Load bot activity configuration
+            botActivityStatus = getString("bot-activity.status", botActivityStatus);
+            botActivityType = getString("bot-activity.type", botActivityType);
+            botActivityText = getString("bot-activity.text", botActivityText);
+            
             // Load MiniMessage formats
             joinMessage = getString("messages.join", joinMessage);
             leaveMessage = getString("messages.leave", leaveMessage);
@@ -98,7 +108,7 @@ public class DiscordConfig {
             logger.info("Discord configuration loaded successfully!");
             
         } catch (Exception e) {
-            logger.error("Failed to load Discord configuration: " + e.getMessage());
+            logger.error("Failed to load configuration: " + e.getMessage());
             createDefaultConfig(configFile);
         }
     }
@@ -106,10 +116,10 @@ public class DiscordConfig {
     private void createDefaultConfig(File configFile) {
         try {
             String content = """
-                # SkyeNetV Discord Configuration
+                # SkyeNetV Configuration
                 # Use MiniMessage format for colored text: https://docs.advntr.dev/minimessage/format.html
                 
-                discord:
+                discord:d
                   # Your Discord bot token (get from https://discord.com/developers/applications)
                   token: "YOUR_BOT_TOKEN_HERE"
                   
@@ -140,6 +150,14 @@ public class DiscordConfig {
                   # Format for Discord messages sent to game (variables: {name}, {message})
                   message_format: "<gray>[Discord]</gray> <white><bold>{name}</bold>:</white> {message}"
                 
+                bot-activity:
+                  # Valid Types: ONLINE, DO_NOT_DISTURB, IDLE, INVISIBLE
+                  status: ONLINE
+                  # Valid Types: PLAYING, STREAMING, LISTENING, WATCHING, COMPETING, CUSTOM_STATUS
+                  type: CUSTOM_STATUS
+                  # Valid placeholders are %online% and/or %max-players% (UPDATES EVERY 5 MINUTES)
+                  text: '%online%/%max-players% - play.skyemc.net'
+                
                 network:
                   # Broadcast join messages to all servers in the network
                   broadcast_join_to_all_servers: true
@@ -150,40 +168,40 @@ public class DiscordConfig {
                   # Show when players transfer between servers
                   show_server_transfers: false
                   
-                  # Network join message format (variables: {player})
-                  join_format: "<green>✅ <bold>{player}</bold> joined the network!</green>"
+                  # Network join message format (variables: {player}, {luckperms_prefix})
+                  join_format: "<green>✅ {luckperms_prefix}<bold>{player}</bold> joined the network!</green>"
                   
-                  # Network leave message format (variables: {player})
-                  leave_format: "<red>❌ <bold>{player}</bold> left the network!</red>"
+                  # Network leave message format (variables: {player}, {luckperms_prefix})
+                  leave_format: "<red>❌ {luckperms_prefix}<bold>{player}</bold> left the network!</red>"
                 
                 messages:
-                  # Player join message (variables: {player})
-                  join: "<green>✅ <bold>{player}</bold> joined the network!</green>"
+                  # Player join message (variables: {player}, {luckperms_prefix})
+                  join: "<green>✅ {luckperms_prefix}<bold>{player}</bold> joined the network!</green>"
                   
-                  # Player leave message (variables: {player})
-                  leave: "<red>❌ <bold>{player}</bold> left the network!</red>"
+                  # Player leave message (variables: {player}, {luckperms_prefix})
+                  leave: "<red>❌ {luckperms_prefix}<bold>{player}</bold> left the network!</red>"
                   
-                  # Server switch message (variables: {player}, {from}, {to})
-                  server_switch: "<yellow>🔄 <bold>{player}</bold> switched from <italic>{from}</italic> to <italic>{to}</italic></yellow>"
+                  # Server switch message (variables: {player}, {from}, {to}, {luckperms_prefix})
+                  server_switch: "<yellow>🔄 {luckperms_prefix}<bold>{player}</bold> switched from <italic>{from}</italic> to <italic>{to}</italic></yellow>"
                   
-                  # Chat message prefix (variables: {server}, {player})
-                  chat_prefix: "<gray>[<blue>{server}</blue>]</gray> <white><bold>{player}</bold>:</white> "
+                  # Chat message prefix (variables: {server}, {player}, {luckperms_prefix})
+                  chat_prefix: "<gray>[<blue>{server}</blue>]</gray> {luckperms_prefix}<white><bold>{player}</bold>:</white> "
                 """;
             
             FileWriter writer = new FileWriter(configFile);
             writer.write(content);
             writer.close();
             
-            logger.info("Created default Discord configuration file: discord_config.yml");
+            logger.info("Created default configuration file: config.yml");
             
         } catch (IOException e) {
-            logger.error("Failed to create Discord configuration file: " + e.getMessage());
+            logger.error("Failed to create configuration file: " + e.getMessage());
         }
     }
     
     public void reloadConfig() {
         loadConfig();
-        logger.info("Discord configuration reloaded!");
+        logger.info("Configuration reloaded!");
     }
     
     // Helper methods for safe config access
@@ -259,8 +277,18 @@ public class DiscordConfig {
     public String getServerSwitchMessage() { return serverSwitchMessage; }
     public String getChatPrefix() { return chatPrefix; }
     
+    // Bot activity getters
+    public String getBotActivityStatus() { return botActivityStatus; }
+    public String getBotActivityType() { return botActivityType; }
+    public String getBotActivityText() { return botActivityText; }
+    
     // Check if Discord is properly configured
     public boolean isConfigured() {
-        return !token.equals("YOUR_BOT_TOKEN_HERE") && !channelId.equals("YOUR_CHANNEL_ID_HERE");
+        return !token.equals("YOUR_BOT_TOKEN_HERE") && 
+               !channelId.equals("YOUR_CHANNEL_ID_HERE") &&
+               !token.equals("REPLACE_WITH_YOUR_ACTUAL_BOT_TOKEN") &&
+               !channelId.equals("REPLACE_WITH_YOUR_ACTUAL_CHANNEL_ID") &&
+               !token.trim().isEmpty() && 
+               !channelId.trim().isEmpty();
     }
 }

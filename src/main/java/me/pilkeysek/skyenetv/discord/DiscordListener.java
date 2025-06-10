@@ -52,6 +52,14 @@ public class DiscordListener extends ListenerAdapter {
                 displayName = event.getMember().getEffectiveName();
             }
 
+            // Debug logging for message details
+            plugin.getLogger().info("Discord message details:");
+            plugin.getLogger().info("  - author name: '{}'", author.getName());
+            plugin.getLogger().info("  - display name: '{}'", displayName);
+            plugin.getLogger().info("  - message.getContentRaw(): '{}'", message.getContentRaw());
+            plugin.getLogger().info("  - message.getContentDisplay(): '{}'", message.getContentDisplay());
+            plugin.getLogger().info("  - message.getContentStripped(): '{}'", message.getContentStripped());
+
             plugin.getLogger().info("Broadcasting Discord message to Minecraft players: [{}] {}", 
                 displayName != null ? displayName : author.getName(), message.getContentDisplay());
 

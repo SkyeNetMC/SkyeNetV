@@ -3,6 +3,7 @@ package me.pilkeysek.skyenetv.utils;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 
 public class PrefixUtils {
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private static final PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
     private static LuckPerms luckPerms;
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(PrefixUtils.class);
 
@@ -148,5 +150,36 @@ public class PrefixUtils {
      */
     public static boolean isLuckPermsAvailable() {
         return luckPerms != null;
+    }
+
+    /**
+     * Get the LuckPerms prefix as plain text for message placeholders
+     * @param player The player to get the prefix for
+     * @return Plain text prefix, or empty string if no prefix
+     */
+    public static String getPlayerPrefixText(Player player) {
+        if (luckPerms == null) {
+            return "";
+        }
+
+        try {
+            User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+            if (user == null) {
+                return "";
+            }
+
+            CachedMetaData metaData = user.getCachedData().getMetaData();
+            String prefix = metaData.getPrefix();
+            
+            if (prefix != null && !prefix.isEmpty()) {
+                // Convert MiniMessage formatted prefix to plain text
+                Component prefixComponent = miniMessage.deserialize(prefix);
+                return plainSerializer.serialize(prefixComponent);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to get prefix text for player {}: {}", player.getUsername(), e.getMessage());
+        }
+
+        return "";
     }
 }
