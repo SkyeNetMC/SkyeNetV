@@ -176,7 +176,7 @@ This project is licensed under the MIT License.
 
 ## Authors
 
-- **NobleSKye** - Project Lead
+- **NobleSkye** - Project Lead
 - **PilkeySEK** - Core Developer  
 - **SkyeNetwork Team** - Contributors
 
