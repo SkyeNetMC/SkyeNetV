@@ -1,6 +1,53 @@
 # Changelog
 
+## Version 3.0.0 (June 15, 2025) - LUCKPERMS JOIN/LEAVE MESSAGES
+
+### ✅ NEW FEATURES
+- **Custom Join/Leave Messages with LuckPerms Integration**
+  - **Join Message Format**: `[+] [PREFIX] PlayerName [SUFFIX] joined the network` (green)
+  - **Leave Message Format**: `[-] [PREFIX] PlayerName [SUFFIX] left the network` (red)
+  - **LuckPerms Prefix/Suffix Support**: Full integration with player ranks and formatting
+  - **Vanilla Message Replacement**: Disables default Velocity join/leave messages
+  - **Network-wide Broadcasting**: Messages sent to all online players
+
+### 🔧 TECHNICAL IMPLEMENTATION
+- **PrefixUtils Enhancement**: Added `createJoinMessage()` and `createLeaveMessage()` methods
+- **Event Handlers**: Added `PostLoginEvent` and `DisconnectEvent` listeners
+- **LuckPerms Integration**: Full support for prefix, suffix, and color formatting
+- **MiniMessage Support**: Proper parsing of LuckPerms formatting tags
+
+### 📦 CURRENT PLUGIN FEATURES
+- **Rules System**: `/rules` command with JSON configuration
+- **Lobby Commands**: `/lobby`, `/l`, `/hub` for server navigation  
+- **Administrative Tools**: `/sudo` command for admin tasks
+- **Custom Join/Leave Messages**: LuckPerms-integrated network messages
+- **LuckPerms Integration**: Prefix, suffix, and color support
+
+### 🎨 MESSAGE EXAMPLES
+```
+[+] [ADMIN] PlayerName joined the network
+[-] [VIP] PlayerName left the network
+[+] [OWNER] PlayerName [★] joined the network
+```
+
+### 🔧 DEPENDENCIES
+- **Velocity API**: Core proxy functionality
+- **LuckPerms API**: Permission and formatting system
+- **Adventure Text MiniMessage**: Text formatting and parsing
+
 ## Version 2.4.7 (June 10, 2025)
+
+### 🚫 CRITICAL FIXES
+- **FIXED: Global Chat Duplication Issue** - Messages no longer appear twice when global chat is enabled
+  - Restructured chat event handler to properly cancel original events
+  - Added early return after global chat processing to prevent duplicate handling
+  - Fixed event.setResult(ChatResult.denied()) implementation
+
+### 📝 NEW FEATURES
+- **Updated Join/Leave Message Formats**
+  - Join: `[+] [PREFIX] PlayerName joined global chat`
+  - Leave: `[-] [PREFIX] PlayerName left global chat`
+  - Clean gray brackets with green/red symbols for better readability
 
 ### 🎨 Configurable Global Chat Messages
 - **Configurable Message Formats**: Global chat messages now use customizable MiniMessage formats

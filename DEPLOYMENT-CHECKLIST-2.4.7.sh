@@ -1,0 +1,88 @@
+#!/bin/bash
+
+echo "🚀 SkyeNetV 2.4.7 - DEPLOYMENT CHECKLIST"
+echo "========================================="
+echo ""
+
+# Check if we're in the right directory
+if [ ! -f "target/SkyeNetV-2.4.7.jar" ]; then
+    echo "❌ ERROR: SkyeNetV-2.4.7.jar not found!"
+    echo "   Make sure you're in the SkyeNetV project directory"
+    echo "   and the plugin has been compiled."
+    exit 1
+fi
+
+echo "✅ Plugin JAR found: $(ls -la target/SkyeNetV-2.4.7.jar | awk '{print $5}') bytes"
+echo ""
+
+echo "📋 PRE-DEPLOYMENT CHECKLIST:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "□ Velocity server is stopped"
+echo "□ Current plugin backed up"
+echo "□ config.yml reviewed for global_chat section"
+echo "□ Discord bot token configured"
+echo "□ LuckPerms is installed and working"
+echo ""
+
+echo "🔧 DEPLOYMENT STEPS:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "1. Stop Velocity server:"
+echo "   systemctl stop velocity"
+echo ""
+echo "2. Backup current plugin:"
+echo "   cp plugins/SkyeNetV-*.jar plugins/SkyeNetV-backup.jar"
+echo ""
+echo "3. Deploy new plugin:"
+echo "   cp $(pwd)/target/SkyeNetV-2.4.7.jar /path/to/velocity/plugins/"
+echo ""
+echo "4. Start server:"
+echo "   systemctl start velocity"
+echo ""
+
+echo "🧪 POST-DEPLOYMENT TESTING:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "□ Player joins server - no errors in console"
+echo "□ Player uses /gc to enable global chat"
+echo "□ Join message shows: [+] [PREFIX] PlayerName joined global chat"
+echo "□ Player sends message - appears ONLY ONCE in global format"
+echo "□ Player uses /gc to disable global chat"
+echo "□ Leave message shows: [-] [PREFIX] PlayerName left global chat"
+echo "□ Local chat still works when global chat disabled"
+echo "□ /lc command works for local bypass"
+echo "□ Discord integration working (if configured)"
+echo ""
+
+echo "🎯 CRITICAL TEST - DUPLICATION FIX:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "1. Player enables global chat: /gc"
+echo "2. Player sends: hello world"
+echo "3. ✅ EXPECTED: Message appears ONCE in global format"
+echo "4. ❌ OLD BUG: Message would appear twice (fixed in 2.4.7!)"
+echo ""
+
+echo "📝 NEW FEATURES IN 2.4.7:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "• ✅ Fixed global chat duplication (CRITICAL FIX)"
+echo "• ✅ New join/leave message format with [+]/[-] brackets"
+echo "• ✅ Improved event handling and flow control"
+echo "• ✅ Enhanced Discord integration reliability"
+echo "• ✅ Configurable global chat message formats"
+echo ""
+
+echo "🆘 ROLLBACK PROCEDURE (if needed):"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "1. Stop server: systemctl stop velocity"
+echo "2. Restore backup: cp plugins/SkyeNetV-backup.jar plugins/SkyeNetV.jar"
+echo "3. Start server: systemctl start velocity"
+echo ""
+
+echo "📞 SUPPORT:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "• Version 2.4.7 fixes the major duplication issue"
+echo "• Check logs for any errors during startup"
+echo "• Test global chat functionality thoroughly"
+echo "• Report any issues for quick resolution"
+echo ""
+
+echo "🎉 SkyeNetV 2.4.7 - Ready for Production Deployment!"
+echo "This version FINALLY resolves the chat duplication issue!"

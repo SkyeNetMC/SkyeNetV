@@ -4,44 +4,30 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.PostOrder;
-import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
-import com.velocitypowered.api.event.player.PlayerChatEvent;
-import com.velocitypowered.api.event.player.ServerPostConnectEvent;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.pilkeysek.skyenetv.config.RulesConfig;
-import me.pilkeysek.skyenetv.config.DiscordConfig;
-import me.pilkeysek.skyenetv.discord.DiscordManager;
-import me.pilkeysek.skyenetv.commands.DiscordCommand;
 import me.pilkeysek.skyenetv.commands.LobbyCommand;
-import me.pilkeysek.skyenetv.commands.LocalChatCommand;
 import me.pilkeysek.skyenetv.commands.RulesCommand;
 import me.pilkeysek.skyenetv.commands.SudoCommand;
-import me.pilkeysek.skyenetv.commands.GlobalChatCommand;
 import me.pilkeysek.skyenetv.utils.PrefixUtils;
 
 import org.slf4j.Logger;
 import com.velocitypowered.api.proxy.ProxyServer;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.nio.file.Path;
 
-@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "2.4.6",
-        url = "skye.host", description = "Utilities for SkyeNet Velocity ProxyServer (smth like that)", authors = {"PilkeySEK"})
+@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "3.0.0",
+        url = "skyemc.net", description = "Core utilities for SkyeNet Velocity ProxyServer", authors = {"NobleSke", "PilkeySEK"})
 public class SkyeNetV {
 
     private final ProxyServer server;
     private final Logger logger;
-    private DiscordManager discordManager;
-    private GlobalChatCommand globalChatCommand;
     private final Path dataDirectory;
-    private DiscordConfig discordConfig;
     private RulesConfig rulesConfig;
 
     @Inject
@@ -56,7 +42,6 @@ public class SkyeNetV {
         }
 
         // Initialize configurations
-        discordConfig = new DiscordConfig(dataDirectory, logger);
         rulesConfig = new RulesConfig(dataDirectory, logger);
 
         logger.info("SkyeNetV initialized!");
@@ -65,149 +50,40 @@ public class SkyeNetV {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         CommandManager commandManager = server.getCommandManager();
-        globalChatCommand = new GlobalChatCommand(this);
         
-        commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand(this));
         commandManager.register(commandManager.metaBuilder("lobby").aliases("l", "hub").plugin(this).build(), new LobbyCommand(server));
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
         commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
-        commandManager.register(commandManager.metaBuilder("gc").aliases("globalchat").plugin(this).build(), globalChatCommand);
-        commandManager.register(commandManager.metaBuilder("lc").aliases("localchat").plugin(this).build(), new LocalChatCommand(this));
 
         // Initialize LuckPerms integration
         PrefixUtils.initialize();
-
-        // Initialize Discord bot
-        if (!discordConfig.isConfigured()) {
-            logger.warn("Please configure your Discord bot token and channel ID in config.yml");
-            return;
-        }
-
-        discordManager = new DiscordManager(this, discordConfig);
     }
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
-        if (discordManager != null) {
-            discordManager.shutdown();
-        }
-    }
-
-    @Subscribe(order = PostOrder.LATE)
-    public void onPlayerChat(PlayerChatEvent event) {
-        Player player = event.getPlayer();
-        String message = event.getMessage();
-        
-        // Handle global chat broadcasting
-        if (player.getCurrentServer().isPresent() && globalChatCommand.shouldSendGlobalMessages(player)) {
-            String serverName = player.getCurrentServer().get().getServerInfo().getName();
-            
-            // Get the appropriate message format from configuration
-            String messageFormat;
-            if (globalChatCommand.shouldShowIcon(player)) {
-                messageFormat = discordConfig.getGlobalChatMessageWithIcon();
-            } else {
-                messageFormat = discordConfig.getGlobalChatMessageWithoutIcon();
-            }
-            
-            // Get player prefix for replacement
-            String playerPrefix = PrefixUtils.getPlayerPrefixText(player);
-            
-            // Replace placeholders in the message format
-            String processedMessage = messageFormat
-                    .replace("{player}", player.getUsername())
-                    .replace("{luckperms_prefix}", playerPrefix)
-                    .replace("{message}", message);
-            
-            // Parse as MiniMessage to create the global chat message
-            Component globalChatMessage = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(processedMessage);
-            
-            // Add hover event for icon version
-            if (globalChatCommand.shouldShowIcon(player)) {
-                Component hoverText = Component.text()
-                        .append(Component.text("Global Chat", NamedTextColor.GOLD, net.kyori.adventure.text.format.TextDecoration.BOLD))
-                        .append(Component.newline())
-                        .append(Component.text("Server: ", NamedTextColor.GRAY))
-                        .append(Component.text(serverName, NamedTextColor.YELLOW))
-                        .append(Component.newline())
-                        .append(Component.text("Player: ", NamedTextColor.GRAY))
-                        .append(Component.text(player.getUsername(), NamedTextColor.WHITE))
-                        .build();
-                
-                globalChatMessage = globalChatMessage.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(hoverText));
-            }
-            
-            // Send to all players who should receive global messages (including sender)
-            for (Player onlinePlayer : server.getAllPlayers()) {
-                if (globalChatCommand.shouldReceiveGlobalMessages(onlinePlayer)) {
-                    onlinePlayer.sendMessage(globalChatMessage);
-                }
-            }
-            
-            // Cancel the original event to prevent duplication
-            event.setResult(PlayerChatEvent.ChatResult.denied());
-        }
-        
-        // Handle Discord integration with new logic
-        if (discordManager != null && event.getPlayer().getCurrentServer().isPresent()) {
-            RegisteredServer currentServer = event.getPlayer().getCurrentServer().get().getServer();
-            String serverName = currentServer.getServerInfo().getName();
-            
-            // Check if server is in disabled list
-            if (discordConfig.getDisabledServers().contains(serverName)) {
-                logger.debug("Server {} is in disabled list, not sending to Discord", serverName);
-                return; // Don't send to Discord for disabled servers
-            }
-            
-            // Check if only global chat should go to Discord
-            if (discordConfig.isOnlyGlobalChatToDiscord()) {
-                // Only send to Discord if player has global chat enabled and is sending messages
-                if (globalChatCommand.shouldSendGlobalMessages(player)) {
-                    discordManager.sendChatMessage(player, message, currentServer);
-                    logger.debug("Sent global chat message to Discord from {}", player.getUsername());
-                } else {
-                    logger.debug("Player {} doesn't have global chat enabled, not sending to Discord", player.getUsername());
-                }
-            } else {
-                // Send all chat to Discord (original behavior)
-                discordManager.sendChatMessage(player, message, currentServer);
-                logger.debug("Sent regular chat message to Discord from {}", player.getUsername());
-            }
-        }
-    }
-
-    @Subscribe
-    public void onServerSwitch(ServerPostConnectEvent event) {
-        if (discordManager != null) {
-            discordManager.sendServerSwitch(
-                event.getPlayer(),
-                event.getPreviousServer(),
-                event.getPlayer().getCurrentServer().get().getServer()
-            );
-        }
+        logger.info("SkyeNetV shutting down...");
     }
 
     @Subscribe
     public void onPlayerJoin(PostLoginEvent event) {
-        Player player = event.getPlayer();
+        // Disable vanilla join message and send custom one
+        event.getPlayer().sendMessage(PrefixUtils.createJoinMessage(event.getPlayer()));
         
-        if (discordManager != null) {
-            discordManager.sendPlayerJoin(player);
-        }
-        
-        // Send global chat notification if global chat is disabled
-        if (globalChatCommand != null && !globalChatCommand.isGlobalChatEnabled(player)) {
-            // Delay the notification slightly so it appears after join messages
-            server.getScheduler().buildTask(this, () -> {
-                globalChatCommand.sendGlobalChatDisabledNotification(player);
-            }).delay(1, java.util.concurrent.TimeUnit.SECONDS).schedule();
+        // Broadcast custom join message to all players
+        for (com.velocitypowered.api.proxy.Player player : server.getAllPlayers()) {
+            if (!player.equals(event.getPlayer())) {
+                player.sendMessage(PrefixUtils.createJoinMessage(event.getPlayer()));
+            }
         }
     }
 
-    @Subscribe
-    public void onPlayerQuit(DisconnectEvent event) {
-        if (discordManager != null) {
-            discordManager.sendPlayerLeave(event.getPlayer());
+    @Subscribe  
+    public void onPlayerLeave(DisconnectEvent event) {
+        // Broadcast custom leave message to all remaining players
+        for (com.velocitypowered.api.proxy.Player player : server.getAllPlayers()) {
+            if (!player.equals(event.getPlayer())) {
+                player.sendMessage(PrefixUtils.createLeaveMessage(event.getPlayer()));
+            }
         }
     }
 
@@ -221,36 +97,5 @@ public class SkyeNetV {
     
     public RulesConfig getRulesConfig() {
         return rulesConfig;
-    }
-    
-    public DiscordConfig getDiscordConfig() {
-        return discordConfig;
-    }
-    
-    public GlobalChatCommand getGlobalChatCommand() {
-        return globalChatCommand;
-    }
-    
-    public DiscordManager getDiscordManager() {
-        return discordManager;
-    }
-    
-    public void reloadDiscordConfig() throws Exception {
-        logger.info("Reloading configuration...");
-        
-        // Load new configuration
-        DiscordConfig newConfig = new DiscordConfig(dataDirectory, logger);
-        
-        // Update the current configuration
-        this.discordConfig = newConfig;
-        
-        // Restart Discord manager with new configuration
-        if (discordManager != null) {
-            discordManager.shutdown();
-        }
-        
-        discordManager = new DiscordManager(this, discordConfig);
-        
-        logger.info("Configuration reloaded successfully!");
     }
 }

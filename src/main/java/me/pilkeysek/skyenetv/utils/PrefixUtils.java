@@ -229,4 +229,38 @@ public class PrefixUtils {
 
         return "";
     }
+
+    /**
+     * Create join message with [+] format and LuckPerms formatting
+     * @param player The player who joined
+     * @return Formatted join message component
+     */
+    public static Component createJoinMessage(Player player) {
+        Component playerName = getFullFormattedName(player);
+        
+        return Component.text()
+                .append(Component.text("[", net.kyori.adventure.text.format.NamedTextColor.GRAY))
+                .append(Component.text("+", net.kyori.adventure.text.format.NamedTextColor.GREEN))
+                .append(Component.text("] ", net.kyori.adventure.text.format.NamedTextColor.GRAY))
+                .append(playerName)
+                .append(Component.text(" joined the network", net.kyori.adventure.text.format.NamedTextColor.GREEN))
+                .build();
+    }
+
+    /**
+     * Create leave message with [-] format and LuckPerms formatting
+     * @param player The player who left
+     * @return Formatted leave message component
+     */
+    public static Component createLeaveMessage(Player player) {
+        Component playerName = getFullFormattedName(player);
+        
+        return Component.text()
+                .append(Component.text("[", net.kyori.adventure.text.format.NamedTextColor.GRAY))
+                .append(Component.text("-", net.kyori.adventure.text.format.NamedTextColor.RED))
+                .append(Component.text("] ", net.kyori.adventure.text.format.NamedTextColor.GRAY))
+                .append(playerName)
+                .append(Component.text(" left the network", net.kyori.adventure.text.format.NamedTextColor.RED))
+                .build();
+    }
 }
