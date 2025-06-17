@@ -26,6 +26,32 @@
       "id": 5,
       "title": "<red>Use Common Sense</red>",
       "description": "<gray>If something seems like it would break the rules, it probably does.</gray>"
+    },
+    {
+      "id": 6,
+      "title": "<red>No Discrimination</red>",
+      "description": "<gray>No Transphobia, Homophobia, Racism, Sexism, Ableism, or any type of discrimination. (misgendering someone even in joke isnt allowed)</gray>"
+    },
+    {
+      "id": 7,
+      "title": "<red>No Griefing</red>",
+      "description": "<gray>Do not destroy or alter other players' builds without permission.</gray>"
+    },
+    {
+      "id": 8,
+      "title": "<red>Respect Staff</red>",
+      "description": "<gray>Follow instructions from server staff and report any issues to them.</gray>"
+    },
+    {
+      "id": 9,
+      "title": "<red>No Excessive Swearing</red>",
+      "description": "<gray>Use respectful language and avoid excessive swearing.</gray>"
+    },
+    {
+      "id": 10,
+      "title": "<red>No Excessive Swearing</red>",
+      "description": "<gray>Use respectful language and avoid excessive swearing.</gray>"
     }
+	  
   ]
 }
