@@ -47,7 +47,8 @@ public class GlobalChatManager {
     public void sendGlobalMessage(Player sender, String message) {
         String playerName = sender.getUsername();
 
-        // Retrieve LuckPerms prefix and suffix using PrefixUtils
+        // Add globe emoji since this is a global message (sender has global chat enabled)
+        // Other players will see this if they have global chat enabled or are on the same server
         String luckPermsPrefix = PrefixUtils.getPrefixString(sender);
         String luckPermsSuffix = PrefixUtils.getSuffixString(sender);
 

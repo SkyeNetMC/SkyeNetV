@@ -22,8 +22,14 @@ public class ChatListener {
         Player player = event.getPlayer();
         String message = event.getMessage();
         
-        // Always process through GlobalChatManager (handles both global and local chat with proper formatting)
-        globalChatManager.processPlayerMessage(player, message);
+        // If player has global chat enabled, treat all messages as global
+        if (globalChatManager.isGlobalChatEnabled(player)) {
+            // Process as a global message
+            globalChatManager.sendGlobalMessage(player, message);
+        } else {
+            // Process as a local message
+            globalChatManager.sendLocalMessage(player, message);
+        }
         
         // Always cancel the original event to prevent backend server duplication
         event.setResult(PlayerChatEvent.ChatResult.denied());
