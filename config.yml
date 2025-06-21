@@ -1,0 +1,109 @@
+# SkyeNetV Configuration File
+# Version: 3.1.0
+# Use MiniMessage format for colored text: https://docs.advntr.dev/minimessage/format.html
+
+# Discord Integration Settings
+discord:
+  # Enable Discord integration
+  enabled: false
+  
+  # Your Discord bot token (get from https://discord.com/developers/applications)
+  # IMPORTANT: Replace this with your actual bot token from Discord Developer Portal DO NOT SHARE IT PUBLICLY
+  token: "YOUR_ACTUAL_BOT_TOKEN_HERE"
+  
+  # Discord channel ID where messages will be sent
+  # IMPORTANT: You must have developer mode enabled in Discord
+  # Replace this with your actual channel ID (right-click channel -> Copy ID)
+  channel: "YOUR_ACTUAL_CHANNEL_ID_HERE"
+  
+  # Send global chat messages to Discord
+  global_chat_to_discord: true
+  
+  # Send Discord messages to game
+  discord_to_game: true
+  
+  # Send join/leave messages to Discord
+  join_leave_to_discord: true
+  
+  # Format for messages sent from game to Discord
+  game_to_discord_format: "**{player}**: {message}"
+  
+  # Format for messages sent from Discord to game
+  discord_to_game_format: "<gray>[Discord]</gray> <white><bold>{user}</bold>:</white> {message}"
+  
+  # Send all messages to Discord
+  send_all_messages_to_discord: false
+
+  # Include server name in Discord messages
+  include_server_name: true
+
+# Global Chat Settings
+global_chat:
+  # Enable global chat functionality
+  enabled: true
+  
+  # Message format for global chat (placeholders: {prefix} {player} {suffix}, {message})
+  format: "<aqua>🌐 {prefix} {player} {suffix}<dark_gray>» {message}</dark_gray>"
+
+  # Default state for new players (true = global chat on by default)
+  default_enabled: true
+  
+  # Message when player enables global chat
+  enabled_message: "<green>🌐 Global chat enabled! Your messages will be sent to all servers.</green>"
+  
+  # Message when player disables global chat
+  disabled_message: "<yellow>🌐 Global chat disabled! Your messages will only be sent to your current server.</yellow>"
+
+# Join/Leave Messages
+join_leave:
+  # Enable custom join/leave messages
+  enabled: true
+  
+  # Suppress vanilla join/leave messages
+  suppress_vanilla: true
+  
+  # Join message format (placeholders: {player}, {prefix}, {suffix})
+  join_format: "[<green>+</green>] {prefix}{player}{suffix} <green>joined the network</green>"
+  
+  # Leave message format (placeholders: {player}, {prefix}, {suffix})
+  leave_format: "[<red>-</red>] {prefix}{player}{suffix} <red>left the network</red>"
+
+# Command Messages
+messages:
+  # Local chat command message
+  local_chat_enabled: "<green>💬 You are now in local chat mode. Your messages will only be sent to your current server.</green>"
+  
+  # Discord command messages
+  discord_info: "<blue>🔗 Discord Integration</blue>"
+  discord_invite: "<green>Join our Discord server!</green>"
+  discord_online: "<green>✅ Discord bot is online and connected!</green>"
+  discord_offline: "<red>❌ Discord bot is offline.</red>"
+  
+  # Error messages
+  no_permission: "<red>You don't have permission to use this command!</red>"
+  player_only: "<red>Only players can use this command!</red>"
+
+# Server Settings
+server:
+  # Lobby server name for /lobby command
+  lobby_server: "lobby"
+
+# Plugin Settings
+plugin:
+  # Enable debug logging
+  debug: false
+
+# Per-Server Settings
+per_server:
+  # Enable per-server settings
+  enabled: true
+  
+  # Server-specific join/leave messages
+  join_messages:
+    network: "<dark_gray>[<green>+<dark_gray>] {player} <dark_gray>has joined the network!"
+    server: "<dark_gray>[<green>+<dark_gray>] {player} <dark_gray>has joined {server}!"
+  
+  leave_messages:
+    network: "<dark_gray>[<red>-<dark_gray>] {player} <dark_gray>has left the network!"
+    server: "<dark_gray>[<red>-<dark_gray>] {player} <dark_gray>has left {server}!"
+

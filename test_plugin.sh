@@ -57,10 +57,16 @@ echo "✅ Discord classes: $DISCORD_COUNT"
 echo ""
 echo "=== Configuration Files ==="
 
-if [ -f "discord_config.yml" ]; then
-    echo "✅ discord_config.yml exists"
+if [ -f "config.yml" ]; then
+    echo "✅ config.yml exists"
+    # Check if it contains discord configuration
+    if grep -q "discord:" "config.yml"; then
+        echo "✅ Discord configuration found in config.yml"
+    else
+        echo "❌ Discord configuration missing from config.yml"
+    fi
 else
-    echo "❌ discord_config.yml missing"
+    echo "❌ config.yml missing"
 fi
 
 if [ -f "src/main/resources/rules.json" ]; then

@@ -68,10 +68,16 @@ jar tf target/SkyeNetV-2.4.3.jar | grep "modules.*\.class"
 echo ""
 echo "=== Configuration Files ==="
 echo "Discord config sample:"
-if [ -f discord_config.yml ]; then
-    echo "✅ discord_config.yml created"
+if [ -f config.yml ]; then
+    echo "✅ config.yml created"
+    # Check if it contains discord configuration
+    if grep -q "discord:" config.yml; then
+        echo "✅ Discord configuration found in config.yml"
+    else
+        echo "❌ Discord configuration missing from config.yml"
+    fi
 else
-    echo "❌ discord_config.yml missing"
+    echo "❌ config.yml missing"
 fi
 
 echo ""

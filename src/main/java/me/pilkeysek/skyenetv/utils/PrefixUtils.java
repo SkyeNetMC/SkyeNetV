@@ -231,6 +231,98 @@ public class PrefixUtils {
     }
 
     /**
+     * Get the prefix for a player as a plain text string
+     * @param player The player to get the prefix for
+     * @return Plain text prefix string, or empty string if no prefix
+     */
+    public static String getPrefixString(Player player) {
+        if (luckPerms == null) {
+            return "";
+        }
+
+        try {
+            User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+            if (user == null) {
+                return "";
+            }
+
+            CachedMetaData metaData = user.getCachedData().getMetaData();
+            String prefix = metaData.getPrefix();
+            
+            if (prefix != null && !prefix.isEmpty()) {
+                // Convert prefix to plain text
+                Component prefixComponent = miniMessage.deserialize(prefix);
+                return plainSerializer.serialize(prefixComponent);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to get prefix string for player {}: {}", player.getUsername(), e.getMessage());
+        }
+
+        return "";
+    }
+
+    /**
+     * Get the suffix for a player as a plain text string
+     * @param player The player to get the suffix for
+     * @return Plain text suffix string, or empty string if no suffix
+     */
+    public static String getSuffixString(Player player) {
+        if (luckPerms == null) {
+            return "";
+        }
+
+        try {
+            User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+            if (user == null) {
+                return "";
+            }
+
+            CachedMetaData metaData = user.getCachedData().getMetaData();
+            String suffix = metaData.getSuffix();
+            
+            if (suffix != null && !suffix.isEmpty()) {
+                // Convert suffix to plain text
+                Component suffixComponent = miniMessage.deserialize(suffix);
+                return plainSerializer.serialize(suffixComponent);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to get suffix string for player {}: {}", player.getUsername(), e.getMessage());
+        }
+
+        return "";
+    }
+
+    /**
+     * Get the raw LuckPerms prefix string with MiniMessage formatting preserved
+     * @param player The player to get the prefix for
+     * @return Raw prefix string with MiniMessage formatting, or empty string if no prefix
+     */
+    public static String getRawPrefixString(Player player) {
+        if (luckPerms == null) {
+            return "";
+        }
+
+        try {
+            User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+            if (user == null) {
+                return "";
+            }
+
+            CachedMetaData metaData = user.getCachedData().getMetaData();
+            String prefix = metaData.getPrefix();
+            
+            if (prefix != null && !prefix.isEmpty()) {
+                // Return the raw prefix string with MiniMessage formatting preserved
+                return prefix;
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to get raw prefix string for player {}: {}", player.getUsername(), e.getMessage());
+        }
+
+        return "";
+    }
+
+    /**
      * Create join message with [+] format and LuckPerms formatting
      * @param player The player who joined
      * @return Formatted join message component
@@ -262,5 +354,52 @@ public class PrefixUtils {
                 .append(playerName)
                 .append(Component.text(" left the network", net.kyori.adventure.text.format.NamedTextColor.RED))
                 .build();
+    }
+
+    /**
+     * Get the formatted name with prefix and suffix as plain text for global chat
+     * @param player The player to get the formatted name for
+     * @return Plain text formatted name with prefix and suffix
+     */
+    public static String getFormattedName(Player player) {
+        if (luckPerms == null) {
+            return player.getUsername();
+        }
+
+        try {
+            User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+            if (user == null) {
+                return player.getUsername();
+            }
+
+            CachedMetaData metaData = user.getCachedData().getMetaData();
+            String prefix = metaData.getPrefix();
+            String suffix = metaData.getSuffix();
+            
+            StringBuilder formattedName = new StringBuilder();
+            
+            if (prefix != null && !prefix.isEmpty()) {
+                // Convert prefix to plain text and add it
+                Component prefixComponent = miniMessage.deserialize(prefix);
+                String prefixText = plainSerializer.serialize(prefixComponent);
+                formattedName.append(prefixText);
+            }
+            
+            formattedName.append(player.getUsername());
+            
+            if (suffix != null && !suffix.isEmpty()) {
+                // Convert suffix to plain text and add it
+                Component suffixComponent = miniMessage.deserialize(suffix);
+                String suffixText = plainSerializer.serialize(suffixComponent);
+                formattedName.append(suffixText);
+            }
+            
+            return formattedName.toString();
+            
+        } catch (Exception e) {
+            logger.warn("Failed to get formatted name for player {}: {}", player.getUsername(), e.getMessage());
+        }
+
+        return player.getUsername();
     }
 }
