@@ -22,13 +22,11 @@ public class ChatListener {
         Player player = event.getPlayer();
         String message = event.getMessage();
         
-        // Process the message through GlobalChatManager
-        if (globalChatManager.processPlayerMessage(player, message)) {
-            // Message was sent to global chat, cancel the original event to prevent backend processing
-            event.setResult(PlayerChatEvent.ChatResult.denied());
-            logger.info("Global chat message sent by {}, original event cancelled", player.getUsername());
-        } else {
-            logger.info("Local chat message by {}, allowing normal processing", player.getUsername());
-        }
+        // Always process through GlobalChatManager (handles both global and local chat with proper formatting)
+        globalChatManager.processPlayerMessage(player, message);
+        
+        // Always cancel the original event to prevent backend server duplication
+        event.setResult(PlayerChatEvent.ChatResult.denied());
+        logger.info("Chat message processed by SkyeNet for {}, backend event cancelled", player.getUsername());
     }
 }

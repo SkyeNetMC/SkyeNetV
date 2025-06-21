@@ -7,6 +7,16 @@
 - **Fixed Global Chat Sender Visibility**: Globe emoji (🌐) now appears correctly on sender's own messages
 - **Fixed Private Messaging Cross-Server**: `/msg` and `/r` commands now work properly across all servers in the network
 - **Fixed Double Globe Emoji Issue**: Removed redundant globe emoji prefix causing double display
+- **Implemented Channel-Based Global Chat**: Complete rewrite of global chat system to work as a proper channel
+
+### 🌐 Global Chat Channel System (MAJOR CHANGE)
+- **Globe Emoji as Status Indicator**: 🌐 now indicates that the MESSAGE SENDER has global chat enabled
+- **Recipient-Based Visibility**: Your ability to see cross-server messages depends on YOUR global chat setting
+- **Smart Message Routing**: 
+  - Global Chat ON: See messages from ALL servers (cross-server channel)
+  - Global Chat OFF: See only messages from YOUR current server
+- **Complete Backend Bypass**: All chat now processed through SkyeNet proxy, preventing duplication
+- **Consistent Formatting**: All messages use SkyeNet formatting with LuckPerms integration
 
 ### 🌐 Global Chat Improvements
 - **Proper Event Cancellation**: Global chat messages now properly cancel local chat events to prevent duplication
