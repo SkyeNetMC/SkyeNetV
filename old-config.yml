@@ -1,0 +1,91 @@
+# SkyeNetV Discord Configuration
+# Use MiniMessage format for colored text: https://docs.advntr.dev/minimessage/format.html
+
+discord:
+  # Your Discord bot token (get from https://discord.com/developers/applications)
+  # IMPORTANT: Replace this with your actual bot token from Discord Developer Portal
+  token: "YOUR_ACTUAL_BOT_TOKEN_HERE"
+  
+  # Discord channel ID where messages will be sent
+  # IMPORTANT: Replace this with your actual channel ID (right-click channel -> Copy ID)
+  channel: "YOUR_ACTUAL_CHANNEL_ID_HERE"
+  
+  # Show server prefixes in chat messages
+  show_prefixes: true
+  
+  # Enable join/leave announcements
+  enable_join_leave: true
+  
+  # Enable server switch announcements
+  enable_server_switch: true
+  
+  # Only send global chat messages to Discord (if false, all chat goes to Discord)
+  only_global_chat_to_discord: true
+  
+  # List of servers where global chat is disabled and messages stay local
+  disabled_servers:
+    - "lobby"
+    - "hub"
+    # Add more server names as needed
+  
+  # Discord name format for messages sent from Discord to game
+  # Options: "username" or "displayname"
+  name_format: "username"
+  
+  # Format for Discord messages sent to game (variables: {name}, {message})
+  message_format: "<gray>[Discord]</gray> <white><bold>{name}</bold>:</white> {message}"
+
+bot-activity:
+  # Valid Types: ONLINE, DO_NOT_DISTURB, IDLE, INVISIBLE
+  status: ONLINE
+  # Valid Types: PLAYING, STREAMING, LISTENING, WATCHING, COMPETING, CUSTOM_STATUS
+  type: CUSTOM_STATUS
+  # Valid placeholders are %online% and/or %max-players% (UPDATES EVERY 5 MINUTES)
+  text: '%online%/%max-players% - play.skyenet.co.in'
+
+network:
+  # Broadcast join messages to all servers in the network
+  broadcast_join_to_all_servers: true
+  
+  # Broadcast leave messages to all servers in the network
+  broadcast_leave_to_all_servers: true
+  
+  # Show when players transfer between servers
+  show_server_transfers: false
+  
+  # Network join message format (variables: {player}, {luckperms_prefix})
+  join_format: "<green>:white_check_mark: {luckperms_prefix}<bold>{player}</bold> joined the network!</green>"
+  
+  # Network leave message format (variables: {player}, {luckperms_prefix})
+  leave_format: "<red>:x: {luckperms_prefix}<bold>{player}</bold> left the network!</red>"
+
+# Message formats using MiniMessage syntax
+messages:
+  # Player join message (variables: {player}, {luckperms_prefix})
+  join: "<green>:white_check_mark: {luckperms_prefix}<bold>{player}</bold> joined the network!</green>"
+  
+  # Player leave message (variables: {player}, {luckperms_prefix})
+  leave: "<red>:x: {luckperms_prefix}<bold>{player}</bold> left the network!</red>"
+  
+  # Server switch message (variables: {player}, {from}, {to}, {luckperms_prefix})
+  server_switch: "<yellow>:arrows_counterclockwise: {luckperms_prefix}<bold>{player}</bold> switched from <italic>{from}</italic> to <italic>{to}</italic></yellow>"
+  
+  # Chat message prefix
+  chat_prefix: "<gray>[<blue>{server}</blue>]</gray> {luckperms_prefix}<white><bold>{player}</bold>:</white> "
+
+# Global Chat message formats (variables: {player}, {luckperms_prefix}, {server})
+global_chat:
+  # Main chat message format when globe icon is shown
+  message_with_icon: ":globe_with_meridians: {luckperms_prefix}<bold>{player}</bold>: {message}"
+  
+  # Main chat message format when globe icon is hidden
+  message_without_icon: "{luckperms_prefix}<bold>{player}</bold>: {message}"
+  
+  # Player joined global chat notification
+  join_message: "<gray>[<green>+<gray>] {luckperms_prefix}<bold>{player}</bold> <green>joined global chat</green>"
+  
+  # Player left global chat notification  
+  leave_message: "<gray>[<red>-<gray>] {luckperms_prefix}<bold>{player}</bold> <red>left global chat</red>"
+  
+  # New player notification (when they join server with global chat disabled)
+  new_player_notification: "<green>You are not connected to global chat. Type </green><gold><bold>/gc</bold></gold><green> to toggle.</green>"

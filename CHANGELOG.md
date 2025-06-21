@@ -1,5 +1,72 @@
 # Changelog
 
+## Version 3.1.0 (June 17, 2025) - DISCORD & GLOBAL CHAT RE-IMPLEMENTATION
+
+### 🆕 Major Features Added Back
+- **Discord Integration**: Complete Discord bot integration with configurable messages
+- **Global Chat System**: Cross-server chat with customizable toggle behavior  
+- **Comprehensive Configuration**: All messages, formats, and behavior now configurable
+
+### 🌐 Global Chat Features
+- `/gc` - Toggle global chat mode or send direct global messages
+- `/lc` - Switch to local chat mode
+- **Smart Message Handling**: When global chat is ON, shows message with globe emoji to sender, broadcasts to all servers, suppresses local
+- **When Global Chat is OFF**: Normal local server chat behavior
+- **Configurable default state** for new players
+- **Custom message formats** with placeholder support
+
+### 💬 Discord Integration
+- **Bidirectional messaging** between Discord and game (configurable)
+- **Global chat to Discord** relay with custom formats
+- **Discord to game** messaging with custom formatting
+- **Connection status monitoring** and status commands
+- **Configurable bot token and channel settings**
+
+### ⚙️ Configuration System
+- **Main config.yml**: Complete configuration for all features
+- **Backwards compatible** discord_config.yml fallback
+- **Configurable message templates** using MiniMessage format
+- **Feature toggles** for Discord integration aspects
+- **Customizable join/leave message formats**
+
+### 🎨 Message Customization
+All command responses and system messages are now configurable:
+- Global chat enable/disable messages
+- Discord status messages  
+- Join/leave message formats
+- Error and permission messages
+- Discord message formatting templates
+
+### 🛠️ Technical Improvements
+- **Smart config loading** with resource template fallbacks
+- **MiniMessage support** for rich text formatting throughout
+- **Improved error handling** and logging
+- **Modular command system** with shared configuration
+- **Memory-efficient** Discord connection management
+
+### 📋 Command Updates
+- `/gc [message]` - Toggle global chat or send global message
+- `/lc` - Switch to local chat mode  
+- `/discord [status]` - Show Discord integration info and status
+- All commands now use configurable messages and permissions
+
+### 🔧 Dependencies
+- **JDA 5.0.0-beta.13** for Discord integration
+- **SnakeYAML 2.0** for configuration management
+- **MiniMessage 4.14.0** for rich text formatting (provided by Velocity)
+- **LuckPerms API 5.4** for prefix/suffix integration (provided)
+
+### 📦 Build Information
+- **JAR Size**: ~47KB (increased from 24KB due to Discord/Global Chat features)
+- **Java Version**: 17+
+- **Velocity Version**: 3.1.1+
+
+### 🔄 Migration Notes
+- Existing v3.0.0 installations will automatically create new configuration files
+- Old discord_config.yml files are still supported as fallback
+- Join/leave message behavior unchanged from v3.0.0
+- All core commands (rules, lobby, sudo) remain unchanged
+
 ## Version 3.0.0 (June 15, 2025) - LUCKPERMS JOIN/LEAVE MESSAGES
 
 ### ✅ NEW FEATURES

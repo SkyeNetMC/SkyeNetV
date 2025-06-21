@@ -88,12 +88,14 @@
 
 ### Discord Integration Not Working
 
-1. **Check discord_config.yml:**
+1. **Check config.yml:**
    ```yaml
    discord:
+     enabled: true
      token: "your-bot-token-here"
-     channel_id: "your-channel-id-here"
-     name_format: "username"  # or "displayname"
+     channel: "your-channel-id-here"
+     global_chat_to_discord: true
+     discord_to_game: true
    ```
 
 2. **Bot Permissions:**
