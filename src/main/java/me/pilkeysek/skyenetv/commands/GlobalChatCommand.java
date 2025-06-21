@@ -7,17 +7,14 @@ import me.pilkeysek.skyenetv.config.Config;
 import me.pilkeysek.skyenetv.utils.GlobalChatManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 public class GlobalChatCommand implements SimpleCommand {
     
-    private final SkyeNetV plugin;
     private final GlobalChatManager globalChatManager;
     private final Config config;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
     
     public GlobalChatCommand(SkyeNetV plugin, GlobalChatManager globalChatManager) {
-        this.plugin = plugin;
         this.globalChatManager = globalChatManager;
         this.config = plugin.getConfig();
     }
@@ -40,9 +37,9 @@ public class GlobalChatCommand implements SimpleCommand {
             Component message = miniMessage.deserialize(messageKey);
             player.sendMessage(message);
         } else {
-            // Send message to global chat regardless of toggle state
+            // Send message to global chat - force it to be global regardless of toggle state
             String message = String.join(" ", invocation.arguments());
-            globalChatManager.sendGlobalMessage(player, message);
+            globalChatManager.processPlayerMessage(player, message, true);
         }
     }
     

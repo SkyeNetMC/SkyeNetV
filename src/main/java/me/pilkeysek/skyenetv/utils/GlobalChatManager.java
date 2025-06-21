@@ -43,72 +43,98 @@ public class GlobalChatManager {
         setGlobalChat(player, newState);
         return newState;
     }
-    
-    public void sendGlobalMessage(Player sender, String message) {
-        String playerName = sender.getUsername();
 
-        // Add globe emoji since this is a global message (sender has global chat enabled)
-        // Other players will see this if they have global chat enabled or are on the same server
-        String luckPermsPrefix = PrefixUtils.getPrefixString(sender);
-        String luckPermsSuffix = PrefixUtils.getSuffixString(sender);
-
-        // Create the global chat message using configurable format (with globe emoji)
+    /**
+     * Process a player's chat message.
+     * 
+     * @param player The player sending the message
+     * @param message The message content
+     * @param forceGlobal If true, treat as global chat regardless of player's toggle state
+     */
+    public void processPlayerMessage(Player player, String message, boolean forceGlobal) {
+        boolean isGlobalChat = forceGlobal || isGlobalChatEnabled(player);
+        
+        // Get player info
+        String playerName = player.getUsername();
+        String luckPermsPrefix = PrefixUtils.getPrefixString(player);
+        String luckPermsSuffix = PrefixUtils.getSuffixString(player);
+        
+        // Get current server information for routing and logging
+        String senderServerName = player.getCurrentServer()
+                .map(serverConnection -> serverConnection.getServerInfo().getName())
+                .orElse("");
+                
+        // Create appropriate message formats
         String formatTemplate = config.getGlobalChatFormat();
-        String formattedMessage = formatTemplate
+        String localFormatTemplate = formatTemplate.replace("🌐", "").trim();
+        
+        // Format global message (with emoji)
+        String globalFormattedMessage = formatTemplate
                 .replace("{prefix}", luckPermsPrefix)
                 .replace("{player}", playerName)
                 .replace("{suffix}", luckPermsSuffix)
                 .replace("{message}", message);
-
-        Component globalMessage = miniMessage.deserialize(formattedMessage);
-
-        // Get sender's current server
-        String senderServerName = sender.getCurrentServer()
-                .map(serverConnection -> serverConnection.getServerInfo().getName())
-                .orElse("");
-
-        // Send to players based on THEIR global chat settings
+                
+        // Format local message (without emoji)
+        String localFormattedMessage = localFormatTemplate
+                .replace("{prefix}", luckPermsPrefix)
+                .replace("{player}", playerName)
+                .replace("{suffix}", luckPermsSuffix)
+                .replace("{message}", message);
+        
+        Component globalComponent = miniMessage.deserialize(globalFormattedMessage);
+        Component localComponent = miniMessage.deserialize(localFormattedMessage);
+        
+        // IMPORTANT: Send formatted message to the sender first
+        // Since we cancel the vanilla event, sender needs to see their own message
+        if (isGlobalChat) {
+            player.sendMessage(globalComponent);
+        } else {
+            player.sendMessage(localComponent);
+        }
+        
+        // For every player on the proxy (except sender)
         for (Player recipient : server.getAllPlayers()) {
-            // If recipient has global chat ON, they see all messages
-            // If recipient has global chat OFF, they only see messages from same server
-            if (isGlobalChatEnabled(recipient) || isSameServer(sender, recipient)) {
-                recipient.sendMessage(globalMessage);
+            // Skip the sender since we already sent them their own message
+            if (recipient.getUniqueId().equals(player.getUniqueId())) {
+                continue;
+            }
+            
+            boolean recipientHasGlobalOn = isGlobalChatEnabled(recipient);
+            boolean sameServer = isSameServer(player, recipient);
+            
+            if (isGlobalChat) {
+                // CASE: Sender has global chat ON (or forced)
+                if (recipientHasGlobalOn) {
+                    // Send global format (with emoji) to all players with global chat ON
+                    recipient.sendMessage(globalComponent);
+                } else if (sameServer) {
+                    // Send local format (no emoji) to players on same server with global chat OFF
+                    recipient.sendMessage(localComponent);
+                }
+            } else {
+                // CASE: Sender has global chat OFF
+                if (sameServer) {
+                    // Only send local format to players on same server
+                    recipient.sendMessage(localComponent);
+                }
+                // Players on other servers don't receive the message
             }
         }
-
-        logger.info("[Global Chat] {} (from {}): {}", sender.getUsername(), senderServerName, message);
+        
+        // Log the message
+        String chatType = isGlobalChat ? "Global" : "Local";
+        logger.info("[{} Chat] {} (from {}): {}", chatType, player.getUsername(), senderServerName, message);
+        
+        // Send to Discord if configured
+        sendMessageToDiscord(player, message);
     }
-    
-    public void sendLocalMessage(Player sender, String message) {
-        String playerName = sender.getUsername();
 
-        // Retrieve LuckPerms prefix and suffix using PrefixUtils
-        String luckPermsPrefix = PrefixUtils.getPrefixString(sender);
-        String luckPermsSuffix = PrefixUtils.getSuffixString(sender);
-
-        // Create local message format (without globe emoji)
-        String formatTemplate = "{prefix}{player}{suffix}: <white>{message}";
-        String formattedMessage = formatTemplate
-                .replace("{prefix}", luckPermsPrefix)
-                .replace("{player}", playerName)
-                .replace("{suffix}", luckPermsSuffix)
-                .replace("{message}", message);
-
-        Component localMessage = miniMessage.deserialize(formattedMessage);
-
-        // Get sender's current server
-        String senderServerName = sender.getCurrentServer()
-                .map(serverConnection -> serverConnection.getServerInfo().getName())
-                .orElse("");
-
-        // Send only to players on the same server
-        for (Player recipient : server.getAllPlayers()) {
-            if (isSameServer(sender, recipient)) {
-                recipient.sendMessage(localMessage);
-            }
-        }
-
-        logger.info("[Local Chat] {} (from {}): {}", sender.getUsername(), senderServerName, message);
+    /**
+     * Process a normal chat message based on player's current global chat setting
+     */
+    public void processPlayerMessage(Player player, String message) {
+        processPlayerMessage(player, message, false);
     }
     
     private boolean isSameServer(Player player1, Player player2) {
@@ -119,26 +145,6 @@ public class GlobalChatManager {
                 .map(serverConnection -> serverConnection.getServerInfo().getName())
                 .orElse("");
         return server1.equals(server2) && !server1.isEmpty();
-    }
-    
-    /**
-     * Process a player's chat message based on the channel system.
-     * Always handles the message through SkyeNet formatting.
-     * 
-     * @param player The player sending the message
-     * @param message The message content
-     */
-    public void processPlayerMessage(Player player, String message) {
-        if (isGlobalChatEnabled(player)) {
-            // Player has global chat ON - send with globe emoji, visible based on recipient settings
-            sendGlobalMessage(player, message);
-        } else {
-            // Player has global chat OFF - send without globe emoji, only to same server
-            sendLocalMessage(player, message);
-        }
-        
-        // Send to Discord if configured
-        sendMessageToDiscord(player, message);
     }
     
     public void sendMessageToDiscord(Player sender, String message) {
@@ -157,7 +163,6 @@ public class GlobalChatManager {
             }
         }
     }
-
     
     public void removePlayer(Player player) {
         globalChatToggle.remove(player.getUniqueId());

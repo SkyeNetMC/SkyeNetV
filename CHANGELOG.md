@@ -1,15 +1,30 @@
 # Changelog
 
-## Version 3.1.1 (June 20, 2025) - GLOBAL CHAT & MESSAGING FIXES
+## Version 3.1.2 (July 5, 2025) - CHAT DUPLICATION FIX
 
 ### 🔧 Critical Bug Fixes
+- **FIXED: Chat Duplication for Senders**: Fixed issue where senders saw their own messages twice
+- **FIXED: Message Format for Senders**: Senders now see their messages with proper formatting (including globe emoji)
+- **FIXED: Message Routing Edge Cases**: Improved message routing logic to ensure proper delivery in all scenarios
+- **FIXED: Self-Message Handling**: Players now see exactly one correctly formatted message for their own chat
+
+## Version 3.1.1 (June 21, 2025) - GLOBAL CHAT SYSTEM REWRITE
+
+### 🔧 Critical Bug Fixes
+- **FIXED: Local Chat Duplication Bug**: Eliminated duplicate messages that appeared when global chat was toggled OFF
+- **FIXED: Global Chat Message Routing**: Complete rewrite of message routing logic with explicit recipient handling
+- **FIXED: Message Format Consistency**: Globe emoji (🌐) now consistently appears only for global chat messages
+- **FIXED: Self-Message Handling**: Players now see their own messages with correct formatting
 - **Fixed Global Chat Message Duplication**: Eliminated double messages when global chat is enabled
 - **Fixed Global Chat Sender Visibility**: Globe emoji (🌐) now appears correctly on sender's own messages
 - **Fixed Private Messaging Cross-Server**: `/msg` and `/r` commands now work properly across all servers in the network
 - **Fixed Double Globe Emoji Issue**: Removed redundant globe emoji prefix causing double display
 - **Implemented Channel-Based Global Chat**: Complete rewrite of global chat system to work as a proper channel
 
-### 🌐 Global Chat Channel System (MAJOR CHANGE)
+### 🌐 Global Chat Channel System (MAJOR UPDATE)
+- **Mutually Exclusive Message Routing**: Completely redesigned routing logic to prevent duplicates
+- **Two-Phase Message Processing**: Separate determination of recipients from message delivery
+- **Format-Based Message Variants**: Different message formats created for different recipient types
 - **Globe Emoji as Status Indicator**: 🌐 now indicates that the MESSAGE SENDER has global chat enabled
 - **Recipient-Based Visibility**: Your ability to see cross-server messages depends on YOUR global chat setting
 - **Smart Message Routing**: 

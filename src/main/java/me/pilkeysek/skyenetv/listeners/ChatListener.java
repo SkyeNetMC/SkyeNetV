@@ -22,17 +22,11 @@ public class ChatListener {
         Player player = event.getPlayer();
         String message = event.getMessage();
         
-        // If player has global chat enabled, treat all messages as global
-        if (globalChatManager.isGlobalChatEnabled(player)) {
-            // Process as a global message
-            globalChatManager.sendGlobalMessage(player, message);
-        } else {
-            // Process as a local message
-            globalChatManager.sendLocalMessage(player, message);
-        }
+        // Process all messages through the unified system
+        globalChatManager.processPlayerMessage(player, message, false);
         
         // Always cancel the original event to prevent backend server duplication
         event.setResult(PlayerChatEvent.ChatResult.denied());
-        logger.info("Chat message processed by SkyeNet for {}, backend event cancelled", player.getUsername());
+        logger.info("Chat message processed by SkyeNetV for {}, backend event cancelled", player.getUsername());
     }
 }
