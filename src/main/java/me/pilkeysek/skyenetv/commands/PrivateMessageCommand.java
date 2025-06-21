@@ -51,12 +51,12 @@ public class PrivateMessageCommand implements SimpleCommand {
             return;
         }
 
-        Component privateMessage = miniMessage.deserialize("<gray>[PM]</gray> <white>{sender}</white>: {message}")
+        Component privateMessage = miniMessage.deserialize(config.getPrivateMessageFormat())
                 .replaceText(builder -> builder.match("{sender}").replacement(sender.getUsername()))
                 .replaceText(builder -> builder.match("{message}").replacement(message));
 
         target.sendMessage(privateMessage);
-        sender.sendMessage(miniMessage.deserialize("<gray>[PM]</gray> <white>You</white>: {message}")
+        sender.sendMessage(miniMessage.deserialize(config.getPrivateMessageSentFormat())
                 .replaceText(builder -> builder.match("{message}").replacement(message)));
 
         lastMessageSender.put(target.getUniqueId(), sender.getUniqueId());

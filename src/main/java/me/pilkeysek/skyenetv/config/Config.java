@@ -1,5 +1,6 @@
 package me.pilkeysek.skyenetv.config;
 
+import com.velocitypowered.api.proxy.Player;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
@@ -111,6 +112,9 @@ public class Config {
             messages.put("discord_offline", "<red>❌ Discord bot is offline.</red>");
             messages.put("no_permission", "<red>You don't have permission to use this command!</red>");
             messages.put("player_only", "<red>Only players can use this command!</red>");
+            // Private message formats
+            messages.put("private_message_format", "<gray>[PM]</gray> <white>{sender}</white>: {message}");
+            messages.put("private_message_sent_format", "<gray>[PM]</gray> <white>You</white>: {message}");
             defaultConfig.put("messages", messages);
             
             // Server Settings
@@ -301,5 +305,11 @@ public class Config {
     
     public Map<String, Object> getConfigMap() {
         return new HashMap<>(config);
+    }
+    
+    // Add method to retrieve LuckPerms prefix
+    public String getLuckPermsPrefix(Player player) {
+        // Placeholder logic to retrieve LuckPerms prefix
+        return "<prefix>"; // Replace with actual LuckPerms API call
     }
 }

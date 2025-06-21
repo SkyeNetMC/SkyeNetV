@@ -32,7 +32,7 @@ discord:
   discord_to_game_format: "<gray>[Discord]</gray> <white><bold>{user}</bold>:</white> {message}"
   
   # Send all messages to Discord
-  send_all_messages_to_discord: false
+  send_all_messages_to_discord: true
 
   # Include server name in Discord messages
   include_server_name: true
@@ -75,7 +75,7 @@ messages:
   
   # Discord command messages
   discord_info: "<blue>🔗 Discord Integration</blue>"
-  discord_invite: "<green>Join our Discord server!</green>"
+  discord_invite: "<click:open_url:'https://skyemc.net/discord'></click><hover:show_text:'<gold>Click to join'><light_purple>Join our Discord <aqua>Click Here</hover>"
   discord_online: "<green>✅ Discord bot is online and connected!</green>"
   discord_offline: "<red>❌ Discord bot is offline.</red>"
   

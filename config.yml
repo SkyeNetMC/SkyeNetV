@@ -75,7 +75,7 @@ messages:
   
   # Discord command messages
   discord_info: "<blue>🔗 Discord Integration</blue>"
-  discord_invite: "<green>Join our Discord server!</green>"
+  discord_invite: "<click:open_url:'skyemc.net/discord'></click><hover:show_text:'<gold>Click to join'><light_purple>Join our Discord <aqua>Click Here</hover>"
   discord_online: "<green>✅ Discord bot is online and connected!</green>"
   discord_offline: "<red>❌ Discord bot is offline.</red>"
   

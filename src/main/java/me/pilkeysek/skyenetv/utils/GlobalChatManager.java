@@ -49,10 +49,14 @@ public class GlobalChatManager {
         String prefix = "🌐 ";
         String playerName = sender.getUsername();
 
+        // Retrieve LuckPerms prefix
+        String luckPermsPrefix = config.getLuckPermsPrefix(sender);
+
         // Create the global chat message using configurable format
         String formatTemplate = config.getGlobalChatFormat();
         String formattedMessage = formatTemplate
                 .replace("{prefix}", prefix)
+                .replace("{luckperms_prefix}", luckPermsPrefix)
                 .replace("{player}", playerName)
                 .replace("{message}", message);
 
@@ -104,6 +108,9 @@ public class GlobalChatManager {
     public void handlePlayerMessage(Player player, String message) {
         if (isGlobalChatEnabled(player)) {
             sendGlobalMessage(player, message);
+        } else {
+            // Log normal chat messages in proxy
+            logger.info("[Normal Chat] {}: {}", player.getUsername(), message);
         }
         sendMessageToDiscord(player, message);
         // Note: Message cancellation is handled by ChatListener using event.setResult()
