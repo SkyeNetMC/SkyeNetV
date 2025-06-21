@@ -42,7 +42,7 @@ public class JoinLeaveListener {
         
         // Broadcast to all players (this effectively replaces the vanilla message)
         for (Player onlinePlayer : server.getAllPlayers()) {
-            onlinePlayer.sendMessage(joinMessage);
+            onlinePlayer.sendMessage(joinMessage); // Pass Component directly
         }
         
         logger.info("{} joined the network with custom message", player.getUsername());
@@ -62,7 +62,7 @@ public class JoinLeaveListener {
         // Broadcast to all remaining players
         for (Player onlinePlayer : server.getAllPlayers()) {
             if (!onlinePlayer.equals(player)) {
-                onlinePlayer.sendMessage(leaveMessage);
+                onlinePlayer.sendMessage(leaveMessage); // Pass Component directly
             }
         }
         

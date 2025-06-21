@@ -231,9 +231,9 @@ public class PrefixUtils {
     }
 
     /**
-     * Get the prefix for a player as a plain text string
+     * Get the prefix for a player as a MiniMessage formatted string
      * @param player The player to get the prefix for
-     * @return Plain text prefix string, or empty string if no prefix
+     * @return MiniMessage formatted prefix string, or empty string if no prefix
      */
     public static String getPrefixString(Player player) {
         if (luckPerms == null) {
@@ -248,23 +248,21 @@ public class PrefixUtils {
 
             CachedMetaData metaData = user.getCachedData().getMetaData();
             String prefix = metaData.getPrefix();
-            
+
             if (prefix != null && !prefix.isEmpty()) {
-                // Convert prefix to plain text
-                Component prefixComponent = miniMessage.deserialize(prefix);
-                return plainSerializer.serialize(prefixComponent);
+                return prefix;
             }
         } catch (Exception e) {
-            logger.warn("Failed to get prefix string for player {}: {}", player.getUsername(), e.getMessage());
+            logger.warn("Failed to get prefix for player {}: {}", player.getUsername(), e.getMessage());
         }
 
         return "";
     }
 
     /**
-     * Get the suffix for a player as a plain text string
+     * Get the suffix for a player as a MiniMessage formatted string
      * @param player The player to get the suffix for
-     * @return Plain text suffix string, or empty string if no suffix
+     * @return MiniMessage formatted suffix string, or empty string if no suffix
      */
     public static String getSuffixString(Player player) {
         if (luckPerms == null) {
@@ -279,14 +277,12 @@ public class PrefixUtils {
 
             CachedMetaData metaData = user.getCachedData().getMetaData();
             String suffix = metaData.getSuffix();
-            
+
             if (suffix != null && !suffix.isEmpty()) {
-                // Convert suffix to plain text
-                Component suffixComponent = miniMessage.deserialize(suffix);
-                return plainSerializer.serialize(suffixComponent);
+                return suffix;
             }
         } catch (Exception e) {
-            logger.warn("Failed to get suffix string for player {}: {}", player.getUsername(), e.getMessage());
+            logger.warn("Failed to get suffix for player {}: {}", player.getUsername(), e.getMessage());
         }
 
         return "";

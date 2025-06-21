@@ -45,28 +45,26 @@ public class GlobalChatManager {
     }
     
     public void sendGlobalMessage(Player sender, String message) {
-        // Prefix global chat messages with a globe emoji
-        String prefix = "🌐 ";
         String playerName = sender.getUsername();
 
-        // Retrieve LuckPerms prefix
-        String luckPermsPrefix = config.getLuckPermsPrefix(sender);
+        // Retrieve LuckPerms prefix and suffix using PrefixUtils
+        String luckPermsPrefix = PrefixUtils.getPrefixString(sender);
+        String luckPermsSuffix = PrefixUtils.getSuffixString(sender);
 
         // Create the global chat message using configurable format
         String formatTemplate = config.getGlobalChatFormat();
         String formattedMessage = formatTemplate
-                .replace("{prefix}", prefix)
-                .replace("{luckperms_prefix}", luckPermsPrefix)
+                .replace("{prefix}", luckPermsPrefix)
                 .replace("{player}", playerName)
+                .replace("{suffix}", luckPermsSuffix)
                 .replace("{message}", message);
 
         Component globalMessage = miniMessage.deserialize(formattedMessage);
 
-        // Send to all players on the network (excluding the sender's local server)
+        // Send the formatted global message to ALL players (including same server)
+        // The ChatListener should cancel the original event to prevent duplication
         for (Player player : server.getAllPlayers()) {
-            if (!player.getCurrentServer().equals(sender.getCurrentServer())) {
-                player.sendMessage(globalMessage);
-            }
+            player.sendMessage(globalMessage);
         }
 
         logger.info("[Global Chat] {}: {}", sender.getUsername(), message);
@@ -83,7 +81,14 @@ public class GlobalChatManager {
         if (isGlobalChatEnabled(player)) {
             // Send as global message only
             sendGlobalMessage(player, message);
+            // Also send to Discord if configured
+            sendMessageToDiscord(player, message);
             return true; // Message sent to global chat, should be cancelled locally
+        } else {
+            // Log normal chat messages in proxy
+            logger.info("[Normal Chat] {}: {}", player.getUsername(), message);
+            // Send to Discord if configured for all messages
+            sendMessageToDiscord(player, message);
         }
         return false; // Message should be handled normally by the server
     }
@@ -105,17 +110,6 @@ public class GlobalChatManager {
         }
     }
 
-    public void handlePlayerMessage(Player player, String message) {
-        if (isGlobalChatEnabled(player)) {
-            sendGlobalMessage(player, message);
-        } else {
-            // Log normal chat messages in proxy
-            logger.info("[Normal Chat] {}: {}", player.getUsername(), message);
-        }
-        sendMessageToDiscord(player, message);
-        // Note: Message cancellation is handled by ChatListener using event.setResult()
-        // If global chat is disabled, the message will be handled normally by the server
-    }
     
     public void removePlayer(Player player) {
         globalChatToggle.remove(player.getUniqueId());

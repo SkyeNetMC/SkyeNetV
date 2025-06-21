@@ -87,6 +87,14 @@ messages:
 server:
   # Lobby server name for /lobby command
   lobby_server: "lobby"
+  
+  # Lobby spawn coordinates
+  lobby_spawn:
+    x: 0.5
+    y: 100.0
+    z: 0.5
+    yaw: 0.0
+    pitch: 0.0
 
 # Plugin Settings
 plugin:
@@ -100,10 +108,10 @@ per_server:
   
   # Server-specific join/leave messages
   join_messages:
-    network: "<dark_gray>[<green>+<dark_gray>] {player} <dark_gray>has joined the network!"
-    server: "<dark_gray>[<green>+<dark_gray>] {player} <dark_gray>has joined {server}!"
-  
+    network: "<dark_gray>[<green>+<dark_gray>] {prefix} {player} <dark_gray>has joined the network!"
+    server: "<dark_gray>[<green>+<dark_gray>] {prefix} {player} <dark_gray>has joined {server}!"
+
   leave_messages:
-    network: "<dark_gray>[<red>-<dark_gray>] {player} <dark_gray>has left the network!"
-    server: "<dark_gray>[<red>-<dark_gray>] {player} <dark_gray>has left {server}!"
+    network: "<dark_gray>[<red>-<dark_gray>] {prefix} {player} <dark_gray>has left the network!"
+    server: "<dark_gray>[<red>-<dark_gray>] {prefix} {player} <dark_gray>has left {server}!"
 
