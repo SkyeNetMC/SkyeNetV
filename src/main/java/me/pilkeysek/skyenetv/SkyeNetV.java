@@ -12,12 +12,11 @@ import me.pilkeysek.skyenetv.config.DiscordConfig;
 import me.pilkeysek.skyenetv.config.Config;
 import me.pilkeysek.skyenetv.commands.LobbyCommand;
 import me.pilkeysek.skyenetv.commands.RulesCommand;
+import me.pilkeysek.skyenetv.commands.SkyeNetVCommand;
 import me.pilkeysek.skyenetv.commands.SudoCommand;
-import me.pilkeysek.skyenetv.commands.GlobalChatCommand;
-import me.pilkeysek.skyenetv.commands.LocalChatCommand;
 import me.pilkeysek.skyenetv.commands.DiscordCommand;
 import me.pilkeysek.skyenetv.utils.PrefixUtils;
-import me.pilkeysek.skyenetv.utils.GlobalChatManager;
+import me.pilkeysek.skyenetv.utils.ChatManager;
 import me.pilkeysek.skyenetv.discord.DiscordManager;
 import me.pilkeysek.skyenetv.listeners.ChatListener;
 import me.pilkeysek.skyenetv.listeners.JoinLeaveListener;
@@ -27,8 +26,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 
 import java.nio.file.Path;
 
-@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "3.1.0",
-        url = "skyemc.net", description = "Core utilities for SkyeNet Velocity ProxyServer with Discord and Global Chat", authors = {"NobleSke", "PilkeySEK"})
+@Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "3.2.1",
+        url = "skyemc.net", description = "Core utilities for SkyeNet Velocity ProxyServer with Discord and Local Chat", authors = {"NobleSke", "PilkeySEK"})
 public class SkyeNetV {
 
     private final ProxyServer server;
@@ -38,7 +37,7 @@ public class SkyeNetV {
     private RulesConfig rulesConfig;
     private DiscordConfig discordConfig;
     private DiscordManager discordManager;
-    private GlobalChatManager globalChatManager;
+    private ChatManager chatManager;
     private ChatListener chatListener;
     private JoinLeaveListener joinLeaveListener;
 
@@ -61,14 +60,14 @@ public class SkyeNetV {
         // Initialize Discord manager
         discordManager = new DiscordManager(server, logger, discordConfig);
         
-        // Initialize global chat manager
-        globalChatManager = new GlobalChatManager(server, logger, discordManager, config);
+        // Initialize chat manager
+        chatManager = new ChatManager(server, logger, discordManager, config);
         
         // Initialize chat listener
-        chatListener = new ChatListener(globalChatManager, logger);
+        chatListener = new ChatListener(chatManager, logger);
         
         // Initialize join/leave listener
-        joinLeaveListener = new JoinLeaveListener(server, logger, globalChatManager, config);
+        joinLeaveListener = new JoinLeaveListener(server, logger, chatManager, config);
 
         logger.info("SkyeNetV initialized!");
     }
@@ -82,9 +81,8 @@ public class SkyeNetV {
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
         commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
         
-        // Register global chat commands
-        commandManager.register(commandManager.metaBuilder("gc").aliases("globalchat", "global").plugin(this).build(), new GlobalChatCommand(this, globalChatManager));
-        commandManager.register(commandManager.metaBuilder("lc").aliases("localchat", "local").plugin(this).build(), new LocalChatCommand(this, globalChatManager));
+        // Register the main plugin command with reload functionality
+        commandManager.register(commandManager.metaBuilder("skyenetv").aliases("snv").plugin(this).build(), new SkyeNetVCommand(this, config, discordManager));
         
         // Register Discord command
         commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand(config));
@@ -134,8 +132,8 @@ public class SkyeNetV {
         return discordManager;
     }
     
-    public GlobalChatManager getGlobalChatManager() {
-        return globalChatManager;
+    public ChatManager getChatManager() {
+        return chatManager;
     }
     
     public Config getConfig() {

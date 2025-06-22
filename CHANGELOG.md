@@ -1,5 +1,28 @@
 # Changelog
 
+## Version 3.2.1 (July 21, 2025) - ADMINISTRATION IMPROVEMENTS
+
+### 🔧 Features and Improvements
+- **Added Plugin Reload Command**: Implemented `/skyenetv reload` and `/snv reload` commands
+- **Removed Discord Reload**: Removed the standalone `/discord reload` command
+- **Simplified Configuration**: Updated config.yml with new reload command documentation
+- **Improved Error Handling**: Better feedback for reload success/failure
+
+## Version 3.2.0 (July 21, 2025) - SIMPLIFIED LOCAL CHAT FOCUS
+
+### 🔄 Major Changes
+- **Removed Global Chat**: Removed all global chat functionality for a simpler chat system
+- **Simplified Chat System**: All messages now stay local to their respective servers
+- **Code Cleanup**: Removed unused global chat toggle code and commands
+- **Streamlined Architecture**: Replaced GlobalChatManager with streamlined ChatManager
+- **Maintained Features**: LuckPerms prefix/suffix integration and Discord forwarding still work
+
+### 🔧 Technical Changes
+- **Replaced GlobalChatManager**: New ChatManager with simplified message routing
+- **Removed Commands**: Removed /gc and /lc commands and related code
+- **Preserved Formatting**: Maintained consistent chat formatting with LuckPerms
+- **Simplified Configuration**: No more need for global chat toggle settings
+
 ## Version 3.1.2 (July 5, 2025) - CHAT DUPLICATION FIX
 
 ### 🔧 Critical Bug Fixes

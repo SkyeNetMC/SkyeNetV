@@ -324,9 +324,27 @@ public class Config {
         return defaultValue;
     }
     
-    public void reload() {
-        loadConfig();
-        logger.info("Configuration reloaded");
+    /**
+     * Reloads the configuration from disk
+     * @return true if reload was successful, false otherwise
+     */
+    public boolean reload() {
+        try {
+            Yaml yaml = new Yaml();
+            FileInputStream inputStream = new FileInputStream(configFile);
+            config = yaml.load(inputStream);
+            inputStream.close();
+            
+            if (config == null) {
+                config = new HashMap<>();
+            }
+            
+            logger.info("Configuration reloaded successfully");
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to reload configuration", e);
+            return false;
+        }
     }
     
     public Map<String, Object> getConfigMap() {

@@ -32,7 +32,7 @@ discord:
   discord_to_game_format: "<gray>[Discord]</gray> <white><bold>{user}</bold>:</white> {message}"
   
   # Send all messages to Discord
-  send_all_messages_to_discord: false
+  send_all_messages_to_discord: true
 
   # Include server name in Discord messages
   include_server_name: true
@@ -43,7 +43,7 @@ global_chat:
   enabled: true
   
   # Message format for global chat (placeholders: {prefix} {player} {suffix}, {message})
-  format: "<aqua>🌐 {prefix} {player} {suffix}<dark_gray>» {message}</dark_gray>"
+  format: "<aqua>🌐 {prefix} {player} {suffix}<gray>» {message}</dark_gray>"
 
   # Default state for new players (true = global chat on by default)
   default_enabled: true
@@ -63,10 +63,10 @@ join_leave:
   suppress_vanilla: true
   
   # Join message format (placeholders: {player}, {prefix}, {suffix})
-  join_format: "[<green>+</green>] {prefix}{player}{suffix} <green>joined the network</green>"
+  join_format: "<gray>[<green>+<gray>]</gray> {prefix}{player}{suffix}"
   
   # Leave message format (placeholders: {player}, {prefix}, {suffix})
-  leave_format: "[<red>-</red>] {prefix}{player}{suffix} <red>left the network</red>"
+  leave_format: "<gray>[<red>-<gray>]</gray> {prefix}{player}{suffix}"
 
 # Command Messages
 messages:
@@ -75,7 +75,7 @@ messages:
   
   # Discord command messages
   discord_info: "<blue>🔗 Discord Integration</blue>"
-  discord_invite: "<click:open_url:'skyemc.net/discord'></click><hover:show_text:'<gold>Click to join'><light_purple>Join our Discord <aqua>Click Here</hover>"
+  discord_invite: "<click:open_url:'https://skyemc.net/discord'></click><hover:show_text:'<gold>Click to join'><light_purple>Join our Discord <aqua>Click Here</hover>"
   discord_online: "<green>✅ Discord bot is online and connected!</green>"
   discord_offline: "<red>❌ Discord bot is offline.</red>"
   
@@ -87,6 +87,14 @@ messages:
 server:
   # Lobby server name for /lobby command
   lobby_server: "lobby"
+  
+  # Lobby spawn coordinates
+  lobby_spawn:
+    x: 0.5
+    y: 100.0
+    z: 0.5
+    yaw: 0.0
+    pitch: 0.0
 
 # Plugin Settings
 plugin:
@@ -100,10 +108,10 @@ per_server:
   
   # Server-specific join/leave messages
   join_messages:
-    network: "<dark_gray>[<green>+<dark_gray>] {player} <dark_gray>has joined the network!"
-    server: "<dark_gray>[<green>+<dark_gray>] {player} <dark_gray>has joined {server}!"
-  
+    network: "<dark_gray>[<green>+<dark_gray>] {prefix} {player} <dark_gray>has joined the network!"
+    server: "<dark_gray>[<green>+<dark_gray>] {prefix} {player} <dark_gray>has joined {server}!"
+
   leave_messages:
-    network: "<dark_gray>[<red>-<dark_gray>] {player} <dark_gray>has left the network!"
-    server: "<dark_gray>[<red>-<dark_gray>] {player} <dark_gray>has left {server}!"
+    network: "<dark_gray>[<red>-<dark_gray>] {prefix} {player} <dark_gray>has left the network!"
+    server: "<dark_gray>[<red>-<dark_gray>] {prefix} {player} <dark_gray>has left {server}!"
 
