@@ -1,5 +1,128 @@
 # Changelog
 
+## Version 3.2.1 (July 21, 2025) - ADMINISTRATION IMPROVEMENTS
+
+### 🔧 Features and Improvements
+- **Added Plugin Reload Command**: Implemented `/skyenetv reload` and `/snv reload` commands
+- **Removed Discord Reload**: Removed the standalone `/discord reload` command
+- **Simplified Configuration**: Updated config.yml with new reload command documentation
+- **Improved Error Handling**: Better feedback for reload success/failure
+
+## Version 3.2.0 (July 21, 2025) - SIMPLIFIED LOCAL CHAT FOCUS
+
+### 🔄 Major Changes
+- **Removed Global Chat**: Removed all global chat functionality for a simpler chat system
+- **Simplified Chat System**: All messages now stay local to their respective servers
+- **Code Cleanup**: Removed unused global chat toggle code and commands
+- **Streamlined Architecture**: Replaced GlobalChatManager with streamlined ChatManager
+- **Maintained Features**: LuckPerms prefix/suffix integration and Discord forwarding still work
+
+### 🔧 Technical Changes
+- **Replaced GlobalChatManager**: New ChatManager with simplified message routing
+- **Removed Commands**: Removed /gc and /lc commands and related code
+- **Preserved Formatting**: Maintained consistent chat formatting with LuckPerms
+- **Simplified Configuration**: No more need for global chat toggle settings
+
+## Version 3.1.2 (July 5, 2025) - CHAT DUPLICATION FIX
+
+### 🔧 Critical Bug Fixes
+- **FIXED: Chat Duplication for Senders**: Fixed issue where senders saw their own messages twice
+- **FIXED: Message Format for Senders**: Senders now see their messages with proper formatting (including globe emoji)
+- **FIXED: Message Routing Edge Cases**: Improved message routing logic to ensure proper delivery in all scenarios
+- **FIXED: Self-Message Handling**: Players now see exactly one correctly formatted message for their own chat
+
+## Version 3.1.1 (June 21, 2025) - GLOBAL CHAT SYSTEM REWRITE
+
+### 🔧 Critical Bug Fixes
+- **FIXED: Local Chat Duplication Bug**: Eliminated duplicate messages that appeared when global chat was toggled OFF
+- **FIXED: Global Chat Message Routing**: Complete rewrite of message routing logic with explicit recipient handling
+- **FIXED: Message Format Consistency**: Globe emoji (🌐) now consistently appears only for global chat messages
+- **FIXED: Self-Message Handling**: Players now see their own messages with correct formatting
+- **Fixed Global Chat Message Duplication**: Eliminated double messages when global chat is enabled
+- **Fixed Global Chat Sender Visibility**: Globe emoji (🌐) now appears correctly on sender's own messages
+- **Fixed Private Messaging Cross-Server**: `/msg` and `/r` commands now work properly across all servers in the network
+- **Fixed Double Globe Emoji Issue**: Removed redundant globe emoji prefix causing double display
+- **Implemented Channel-Based Global Chat**: Complete rewrite of global chat system to work as a proper channel
+
+### 🌐 Global Chat Channel System (MAJOR UPDATE)
+- **Mutually Exclusive Message Routing**: Completely redesigned routing logic to prevent duplicates
+- **Two-Phase Message Processing**: Separate determination of recipients from message delivery
+- **Format-Based Message Variants**: Different message formats created for different recipient types
+- **Globe Emoji as Status Indicator**: 🌐 now indicates that the MESSAGE SENDER has global chat enabled
+- **Recipient-Based Visibility**: Your ability to see cross-server messages depends on YOUR global chat setting
+- **Smart Message Routing**: 
+  - Global Chat ON: See messages from ALL servers (cross-server channel)
+  - Global Chat OFF: See only messages from YOUR current server
+- **Complete Backend Bypass**: All chat now processed through SkyeNet proxy, preventing duplication
+- **Consistent Formatting**: All messages use SkyeNet formatting with LuckPerms integration
+
+### 🌐 Global Chat Improvements
+- **Proper Event Cancellation**: Global chat messages now properly cancel local chat events to prevent duplication
+- **LuckPerms Integration Fix**: Now uses proper `PrefixUtils.getPrefixString()` and `PrefixUtils.getSuffixString()` methods
+- **Consistent Message Format**: All recipients (including sender) see the same formatted global chat message
+- **Single Message Path**: Streamlined message processing to eliminate race conditions
+
+### 💬 Private Messaging Enhancements
+- **Cross-Server Player Search**: Enhanced player lookup finds players by exact name or partial name matches across servers
+- **Improved Error Messages**: More descriptive error messages when players are not found
+- **Better Reply Functionality**: Reply system now works seamlessly across different servers
+- **Self-Message Prevention**: Prevents sending messages to yourself with humorous error message
+
+### 🔧 Technical Fixes
+- **Consolidated Message Processing**: Removed redundant `handlePlayerMessage()` method to prevent double processing
+- **Fixed Component Handling**: Resolved compilation issues with join/leave message Component handling
+- **Enhanced Player Lookup**: Improved `findPlayer()` method with comprehensive cross-server search
+- **Lobby Command Infrastructure**: Added configuration support for lobby teleportation coordinates
+
+### 📋 Code Quality Improvements
+- **Removed Placeholder Methods**: Eliminated unused `getLuckPermsPrefix()` placeholder in Config.java
+- **Fixed ChatListener Syntax**: Cleaned up duplicate code and syntax errors in ChatListener.java
+- **Early Event Processing**: Used `PostOrder.FIRST` to ensure global chat events are processed before backend servers
+
+### 🛠️ Build & Deployment
+- **Updated Version**: Incremented to 3.1.1 to reflect all bug fixes and improvements
+- **Maven Build Success**: Plugin compiles cleanly with no errors or warnings
+- **JAR Generation**: Successfully generates `SkyeNetV-3.1.1.jar` for deployment
+
+### 🎯 What Was Fixed in Detail
+
+#### Global Chat Message Flow (Before vs After)
+**Before (3.1.0):**
+```
+1. Player sends message "test"
+2. ChatListener processes message → calls processPlayerMessage()
+3. sendGlobalMessage() adds extra 🌐 prefix
+4. Message sent to all players: "🌐 🌐 [PREFIX] Player test"
+5. Local server also processes message normally
+6. Result: Double messages and double globe emojis
+```
+
+**After (3.1.1):**
+```
+1. Player sends message "test"
+2. ChatListener processes message → calls processPlayerMessage()
+3. sendGlobalMessage() uses config format directly (no extra prefix)
+4. Message sent to all players: "🌐 [PREFIX] Player » test"
+5. Original chat event is cancelled (event.setResult(denied()))
+6. Result: Single message with single globe emoji
+```
+
+#### LuckPerms Integration (Before vs After)
+**Before:**
+- Used placeholder `config.getLuckPermsPrefix(player)` returning `"<prefix>"`
+- Wrong placeholder replacement: `{luckperms_prefix}` (not in config format)
+
+**After:**
+- Uses proper `PrefixUtils.getPrefixString(player)` and `PrefixUtils.getSuffixString(player)`
+- Correct placeholder replacement: `{prefix}` and `{suffix}` (matching config format)
+
+### 🧪 Testing Results
+- **Global Chat**: No more double messages ✅
+- **Globe Emoji**: Single emoji display for all users ✅
+- **LuckPerms Prefixes**: Proper prefix/suffix display ✅
+- **Cross-Server Messaging**: Private messages work between servers ✅
+- **Event Cancellation**: No local chat duplication ✅
+
 ## Version 3.1.0 (June 17, 2025) - DISCORD & GLOBAL CHAT RE-IMPLEMENTATION
 
 ### 🆕 Major Features Added Back

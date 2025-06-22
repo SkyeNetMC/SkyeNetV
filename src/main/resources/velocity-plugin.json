@@ -1,9 +1,9 @@
 {
     "id": "skyenetv",
     "name": "SkyeNet Velocity Plugin",
-    "version": "3.1.0",
-    "description": "Core utilities for SkyeNet Velocity ProxyServer with Discord integration and Global Chat",
-    "url": "https://skyenet.co.in",
+    "version": "3.2.1",
+    "description": "Core utilities for SkyeNet Velocity ProxyServer with Discord integration and Local Chat",
+    "url": "https://skyemc.net",
     "authors": ["NobleSKye", "PilkeySEK", "SkyeNetwork Team"],
     "dependencies": [],
     "main": "me.pilkeysek.skyenetv.SkyeNetV"

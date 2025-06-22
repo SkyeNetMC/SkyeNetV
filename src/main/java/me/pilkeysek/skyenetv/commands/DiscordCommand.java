@@ -23,17 +23,8 @@ public class DiscordCommand implements SimpleCommand {
             // Show Discord invite message
             String inviteMessage = config.getDiscordInviteMessage();
             source.sendMessage(miniMessage.deserialize(inviteMessage));
-        } else if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
-            // Check permission for reload
-            if (!source.hasPermission("skyenetv.discord.reload")) {
-                source.sendMessage(miniMessage.deserialize("<red>You don't have permission to reload the configuration!</red>"));
-                return;
-            }
-            // Reload the configuration
-            config.reload();
-            source.sendMessage(miniMessage.deserialize("<green>Configuration reloaded successfully!</green>"));
         } else {
-            source.sendMessage(miniMessage.deserialize("<red>Usage: /discord [reload]</red>"));
+            source.sendMessage(miniMessage.deserialize("<red>Usage: /discord</red>"));
         }
     }
 

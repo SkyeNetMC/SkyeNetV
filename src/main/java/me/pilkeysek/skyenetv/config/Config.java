@@ -1,5 +1,6 @@
 package me.pilkeysek.skyenetv.config;
 
+import com.velocitypowered.api.proxy.Player;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
@@ -88,7 +89,7 @@ public class Config {
             // Global Chat Settings
             Map<String, Object> globalChat = new HashMap<>();
             globalChat.put("enabled", true);
-            globalChat.put("format", "🌐 {prefix}{player}: {message}");
+            globalChat.put("format", "🌐 {prefix}{player}: <white>{message}");
             globalChat.put("default_enabled", false);
             globalChat.put("enabled_message", "<green>🌐 Global chat enabled! Your messages will be sent to all servers.</green>");
             globalChat.put("disabled_message", "<yellow>🌐 Global chat disabled! Your messages will only be sent to your current server.</yellow>");
@@ -98,10 +99,26 @@ public class Config {
             Map<String, Object> joinLeave = new HashMap<>();
             joinLeave.put("enabled", true);
             joinLeave.put("suppress_vanilla", true);
-            joinLeave.put("join_format", "<gray>[</gray><green><bold>+</bold></green><gray>]</gray> {prefix}<white>{player}</white>{suffix} <green>joined the network</green>");
-            joinLeave.put("leave_format", "<gray>[</gray><red><bold>-</bold></red><gray>]</gray> {prefix}<white>{player}</white>{suffix} <red>left the network</red>");
+            joinLeave.put("join_format", "[<green>+</green>] {prefix}{player}{suffix} <green>joined the network</green>");
+            joinLeave.put("leave_format", "[<red>-</red>] {prefix}{player}{suffix} <red>left the network</red>");
             defaultConfig.put("join_leave", joinLeave);
-            
+
+            // Per-Server Settings
+            Map<String, Object> perServer = new HashMap<>();
+            perServer.put("enabled", true);
+
+            Map<String, Object> joinMessages = new HashMap<>();
+            joinMessages.put("network", "<dark_gray>[<green>+<dark_gray>] {prefix}{player} <dark_gray>has joined the network!");
+            joinMessages.put("server", "<dark_gray>[<green>+<dark_gray>] {prefix}{player} <dark_gray>has joined {server}!");
+            perServer.put("join_messages", joinMessages);
+
+            Map<String, Object> leaveMessages = new HashMap<>();
+            leaveMessages.put("network", "<dark_gray>[<red>-<dark_gray>] {prefix}{player} <dark_gray>has left the network!");
+            leaveMessages.put("server", "<dark_gray>[<red>-<dark_gray>] {prefix}{player} <dark_gray>has left {server}!");
+            perServer.put("leave_messages", leaveMessages);
+
+            defaultConfig.put("per_server", perServer);
+
             // Messages
             Map<String, Object> messages = new HashMap<>();
             messages.put("local_chat_enabled", "<green>💬 You are now in local chat mode. Your messages will only be sent to your current server.</green>");
@@ -111,11 +128,24 @@ public class Config {
             messages.put("discord_offline", "<red>❌ Discord bot is offline.</red>");
             messages.put("no_permission", "<red>You don't have permission to use this command!</red>");
             messages.put("player_only", "<red>Only players can use this command!</red>");
+            // Private message formats
+            messages.put("private_message_format", "<gray>[PM]</gray> <white>{sender}</white>: {message}");
+            messages.put("private_message_sent_format", "<gray>[PM]</gray> <white>You</white>: {message}");
             defaultConfig.put("messages", messages);
             
             // Server Settings
             Map<String, Object> server = new HashMap<>();
             server.put("lobby_server", "lobby");
+            
+            // Lobby spawn coordinates
+            Map<String, Object> lobbySpawn = new HashMap<>();
+            lobbySpawn.put("x", 0.5);
+            lobbySpawn.put("y", 100.0);
+            lobbySpawn.put("z", 0.5);
+            lobbySpawn.put("yaw", 0.0);
+            lobbySpawn.put("pitch", 0.0);
+            server.put("lobby_spawn", lobbySpawn);
+            
             defaultConfig.put("server", server);
             
             // Plugin Settings
@@ -190,11 +220,11 @@ public class Config {
     }
     
     public String getJoinMessage() {
-        return getString("join_leave.join_format", "<gray>[</gray><green><bold>+</bold></green><gray>]</gray> {prefix}<white>{player}</white>{suffix} <green>joined the network</green>");
+        return getString("join_leave.join_format", "[<green>+</green>] {prefix}{player}{suffix} <green>joined the network</green>");
     }
     
     public String getLeaveMessage() {
-        return getString("join_leave.leave_format", "<gray>[</gray><red><bold>-</bold></red><gray>]</gray> {prefix}<white>{player}</white>{suffix} <red>left the network</red>");
+        return getString("join_leave.leave_format", "[<red>-</red>] {prefix}{player}{suffix} <red>left the network</red>");
     }
     
     public String getLeaveMessage(String type) {
@@ -294,12 +324,79 @@ public class Config {
         return defaultValue;
     }
     
-    public void reload() {
-        loadConfig();
-        logger.info("Configuration reloaded");
+    /**
+     * Reloads the configuration from disk
+     * @return true if reload was successful, false otherwise
+     */
+    public boolean reload() {
+        try {
+            Yaml yaml = new Yaml();
+            FileInputStream inputStream = new FileInputStream(configFile);
+            config = yaml.load(inputStream);
+            inputStream.close();
+            
+            if (config == null) {
+                config = new HashMap<>();
+            }
+            
+            logger.info("Configuration reloaded successfully");
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to reload configuration", e);
+            return false;
+        }
     }
     
     public Map<String, Object> getConfigMap() {
         return new HashMap<>(config);
+    }
+    
+    // Add method to retrieve LuckPerms prefix
+    public String getLuckPermsPrefix(Player player) {
+        // Placeholder logic to retrieve LuckPerms prefix
+        return "<prefix>"; // Replace with actual LuckPerms API call
+    }
+    
+    // Private Message Formats
+    public String getPrivateMessageFormat() {
+        return getString("messages.private_message_format", "<gray>[PM]</gray> <white>{sender}</white>: {message}");
+    }
+
+    public String getPrivateMessageSentFormat() {
+        return getString("messages.private_message_sent_format", "<gray>[PM]</gray> <white>You</white>: {message}");
+    }
+    
+    // Lobby Configuration Methods
+    public String getLobbyServerName() {
+        return getString("server.lobby_server", "lobby");
+    }
+    
+    public double getLobbySpawnX() {
+        return getDouble("server.lobby_spawn.x", 0.5);
+    }
+    
+    public double getLobbySpawnY() {
+        return getDouble("server.lobby_spawn.y", 100.0);
+    }
+    
+    public double getLobbySpawnZ() {
+        return getDouble("server.lobby_spawn.z", 0.5);
+    }
+    
+    public float getLobbySpawnYaw() {
+        return (float) getDouble("server.lobby_spawn.yaw", 0.0);
+    }
+    
+    public float getLobbySpawnPitch() {
+        return (float) getDouble("server.lobby_spawn.pitch", 0.0);
+    }
+    
+    // Helper method for double values
+    public double getDouble(String path, double defaultValue) {
+        Object value = getValueAtPath(path, Object.class, defaultValue);
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        return defaultValue;
     }
 }

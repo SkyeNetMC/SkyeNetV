@@ -7,7 +7,7 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.pilkeysek.skyenetv.config.Config;
-import me.pilkeysek.skyenetv.utils.GlobalChatManager;
+import me.pilkeysek.skyenetv.utils.ChatManager;
 import me.pilkeysek.skyenetv.utils.PrefixUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -17,14 +17,14 @@ public class JoinLeaveListener {
     
     private final ProxyServer server;
     private final Logger logger;
-    private final GlobalChatManager globalChatManager;
+    private final ChatManager chatManager;
     private final Config config;
     private final MiniMessage miniMessage;
     
-    public JoinLeaveListener(ProxyServer server, Logger logger, GlobalChatManager globalChatManager, Config config) {
+    public JoinLeaveListener(ProxyServer server, Logger logger, ChatManager chatManager, Config config) {
         this.server = server;
         this.logger = logger;
-        this.globalChatManager = globalChatManager;
+        this.chatManager = chatManager;
         this.config = config;
         this.miniMessage = MiniMessage.miniMessage();
     }
@@ -42,7 +42,7 @@ public class JoinLeaveListener {
         
         // Broadcast to all players (this effectively replaces the vanilla message)
         for (Player onlinePlayer : server.getAllPlayers()) {
-            onlinePlayer.sendMessage(joinMessage);
+            onlinePlayer.sendMessage(joinMessage); // Pass Component directly
         }
         
         logger.info("{} joined the network with custom message", player.getUsername());
@@ -62,13 +62,13 @@ public class JoinLeaveListener {
         // Broadcast to all remaining players
         for (Player onlinePlayer : server.getAllPlayers()) {
             if (!onlinePlayer.equals(player)) {
-                onlinePlayer.sendMessage(leaveMessage);
+                onlinePlayer.sendMessage(leaveMessage); // Pass Component directly
             }
         }
         
-        // Clean up global chat toggle for the player
-        if (globalChatManager != null) {
-            globalChatManager.removePlayer(player);
+        // Clean up any player data
+        if (chatManager != null) {
+            chatManager.removePlayer(player);
         }
         
         logger.info("{} left the network with custom message", player.getUsername());
