@@ -67,7 +67,7 @@ public class SkyeNetV {
         chatListener = new ChatListener(chatManager, logger);
         
         // Initialize join/leave listener
-        joinLeaveListener = new JoinLeaveListener(server, logger, chatManager, config);
+        joinLeaveListener = new JoinLeaveListener(server, logger, chatManager, discordManager, config);
 
         logger.info("SkyeNetV initialized!");
     }

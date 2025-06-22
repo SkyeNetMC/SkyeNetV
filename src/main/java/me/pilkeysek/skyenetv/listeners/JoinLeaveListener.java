@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.pilkeysek.skyenetv.config.Config;
+import me.pilkeysek.skyenetv.discord.DiscordManager;
 import me.pilkeysek.skyenetv.utils.ChatManager;
 import me.pilkeysek.skyenetv.utils.PrefixUtils;
 import net.kyori.adventure.text.Component;
@@ -18,13 +19,15 @@ public class JoinLeaveListener {
     private final ProxyServer server;
     private final Logger logger;
     private final ChatManager chatManager;
+    private final DiscordManager discordManager;
     private final Config config;
     private final MiniMessage miniMessage;
     
-    public JoinLeaveListener(ProxyServer server, Logger logger, ChatManager chatManager, Config config) {
+    public JoinLeaveListener(ProxyServer server, Logger logger, ChatManager chatManager, DiscordManager discordManager, Config config) {
         this.server = server;
         this.logger = logger;
         this.chatManager = chatManager;
+        this.discordManager = discordManager;
         this.config = config;
         this.miniMessage = MiniMessage.miniMessage();
     }
@@ -44,6 +47,8 @@ public class JoinLeaveListener {
         for (Player onlinePlayer : server.getAllPlayers()) {
             onlinePlayer.sendMessage(joinMessage); // Pass Component directly
         }
+
+        sendJoinMessageToDiscord(player.getUsername());
         
         logger.info("{} joined the network with custom message", player.getUsername());
     }
@@ -65,6 +70,8 @@ public class JoinLeaveListener {
                 onlinePlayer.sendMessage(leaveMessage); // Pass Component directly
             }
         }
+
+        sendLeaveMessageToDiscord(player.getUsername());
         
         // Clean up any player data
         if (chatManager != null) {
@@ -118,5 +125,31 @@ public class JoinLeaveListener {
         Component message = miniMessage.deserialize(formattedMessage);
         
         return message;
+    }
+
+    public void sendJoinMessageToDiscord(String playerName) {
+        if (discordManager != null && discordManager.isConnected()) {
+            String discordFormat = config.getGameToDiscordJoinFormat();
+
+            String discordMessage = discordFormat
+                    .replace("{player}", playerName);
+
+            if (config.isSendAllMessagesToDiscord()) {
+                discordManager.sendToDiscord(discordMessage);
+            }
+        }
+    }
+
+    public void sendLeaveMessageToDiscord(String playerName) {
+        if (discordManager != null && discordManager.isConnected()) {
+            String discordFormat = config.getGameToDiscordLeaveFormat();
+
+            String discordMessage = discordFormat
+                    .replace("{player}", playerName);
+
+            if (config.isSendAllMessagesToDiscord()) {
+                discordManager.sendToDiscord(discordMessage);
+            }
+        }
     }
 }

@@ -273,6 +273,16 @@ public class Config {
     public String getGameToDiscordFormat() {
         return getString("discord.game_to_discord_format", "**{player}**: {message}");
     }
+
+    // Join message in discord
+    public String getGameToDiscordJoinFormat() {
+        return getString("discord.game_to_discord_join_format", "**[+]** {player} joined the network");
+    }
+
+    // Leave message in discord
+    public String getGameToDiscordLeaveFormat() {
+        return getString("discord.game_to_discord_join_format", "**[-]** {player} left the network");
+    }
     
     public String getDiscordToGameFormat() {
         return getString("discord.discord_to_game_format", "<gray>[Discord]</gray> <white><bold>{user}</bold>:</white> {message}");
