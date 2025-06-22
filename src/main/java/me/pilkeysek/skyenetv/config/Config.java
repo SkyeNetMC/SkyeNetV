@@ -281,7 +281,7 @@ public class Config {
 
     // Leave message in discord
     public String getGameToDiscordLeaveFormat() {
-        return getString("discord.game_to_discord_join_format", "**[-]** {player} left the network");
+        return getString("discord.game_to_discord_leave_format", "**[-]** {player} left the network");
     }
     
     public String getDiscordToGameFormat() {
