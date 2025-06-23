@@ -54,6 +54,11 @@ global_chat:
   # Message when player disables global chat
   disabled_message: "<yellow>🌐 Global chat disabled! Your messages will only be sent to your current server.</yellow>"
 
+# Chat Settings
+chat:
+  # Message format for chat (placeholders: {server} {prefix} {player} {suffix}, {message})
+  format: "{server} {prefix}{player}{suffix} <gray>»<gray> {message}"
+
 # Join/Leave Messages
 join_leave:
   # Enable custom join/leave messages

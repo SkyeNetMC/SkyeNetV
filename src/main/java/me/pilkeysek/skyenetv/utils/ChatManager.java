@@ -58,6 +58,7 @@ public class ChatManager {
         
         // Format the message
         String formattedMessage = formatTemplate
+                .replace("{server}", senderServerName)
                 .replace("{prefix}", luckPermsPrefix)
                 .replace("{player}", playerName)
                 .replace("{suffix}", luckPermsSuffix)

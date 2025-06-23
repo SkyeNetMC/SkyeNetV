@@ -95,6 +95,11 @@ public class Config {
             globalChat.put("disabled_message", "<yellow>🌐 Global chat disabled! Your messages will only be sent to your current server.</yellow>");
             defaultConfig.put("global_chat", globalChat);
             
+            // Chat Settings
+            Map<String, Object> chat = new HashMap<>();
+            chat.put("format", "{server} {prefix}{player}{suffix} <gray>»<gray> {message}");
+            defaultConfig.put("chat", chat);
+            
             // Join/Leave Settings
             Map<String, Object> joinLeave = new HashMap<>();
             joinLeave.put("enabled", true);
