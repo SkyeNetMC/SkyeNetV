@@ -15,6 +15,7 @@ import me.pilkeysek.skyenetv.commands.RulesCommand;
 import me.pilkeysek.skyenetv.commands.SkyeNetVCommand;
 import me.pilkeysek.skyenetv.commands.SudoCommand;
 import me.pilkeysek.skyenetv.commands.DiscordCommand;
+import me.pilkeysek.skyenetv.commands.FlyCommand;
 import me.pilkeysek.skyenetv.utils.PrefixUtils;
 import me.pilkeysek.skyenetv.utils.ChatManager;
 import me.pilkeysek.skyenetv.discord.DiscordManager;
@@ -80,6 +81,7 @@ public class SkyeNetV {
         commandManager.register(commandManager.metaBuilder("lobby").aliases("l", "hub").plugin(this).build(), new LobbyCommand(server, config));
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
         commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
+        commandManager.register(commandManager.metaBuilder("fly").plugin(this).build(), new FlyCommand(server));
         
         // Register the main plugin command with reload functionality
         commandManager.register(commandManager.metaBuilder("skyenetv").aliases("snv").plugin(this).build(), new SkyeNetVCommand(this, config, discordManager));
