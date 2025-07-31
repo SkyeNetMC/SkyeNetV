@@ -1,5 +1,100 @@
 # Changelog
 
+## Version 3.2.7 (July 3, 2025) - DEVELOPER API RELEASE
+
+### 🔧 API Introduction
+- **SkyeNetV API**: Added public API for other plugins to integrate with SkyeNetV's cross-server functionality
+- **Plugin Integration**: Other Velocity plugins can now use SkyeNetV's player lookup and messaging systems
+- **Easy Access**: Simple API provider pattern for seamless integration
+- **Documentation**: Comprehensive API guide with examples and best practices
+
+### 🔧 API Features
+- **Cross-Server Player Lookup**: Find players across all servers with exact or partial name matching
+- **Message Sending**: Send messages to specific players anywhere in the network
+- **Network Broadcasting**: Broadcast messages to all players or specific servers
+- **Player Status**: Check if players are online and which server they're on
+- **Safe Access**: Null-safe API with availability checkingd
+
+### 📋 API Usage
+- **Get API**: `SkyeNetVProvider.getAPI()` - Access the API instance
+- **Check Availability**: `SkyeNetVProvider.isAvailable()` - Verify API is loaded
+- **Find Players**: `api.findPlayer(name)` - Locate players across servers
+- **Send Messages**: `api.sendCrossServerMessage(player, message)` - Cross-server messaging
+- **Broadcast**: `api.broadcastToNetwork(message)` - Network-wide announcements
+
+### 🎯 Benefits for Developers
+- **Easy Integration**: Simple dependency setup with clear documentation
+- **Consistent API**: Uses the same reliable systems as SkyeNetV's built-in commands
+- **Performance**: Optimized player lookup and message delivery
+- **Flexibility**: Support for both Player objects and string names
+- **Safety**: Proper error handling and null checks throughout
+
+## Version 3.2.6 (July 3, 2025) - CROSS-SERVER PRIVATE MESSAGING
+
+### 🔧 Command Additions
+- **Enabled Private Messaging**: Registered `/msg`, `/tell`, and `/whisper` commands for cross-server private messaging
+- **Reply Functionality**: Added `/reply` and `/r` commands to quickly respond to private messages
+- **Network-Wide Communication**: Players can now send private messages to anyone across all servers in the network
+- **No Proxy Logging**: Private messages are not logged by the proxy for privacy
+
+### 🔧 Technical Changes
+- **Added PrivateMessageCommand**: Cross-server private messaging with player lookup across all servers
+- **Added ReplyCommand**: Dedicated reply command that delegates to PrivateMessageCommand
+- **Command Registration**: Properly registered private messaging commands in SkyeNetV.java
+- **Privacy Focused**: No logging of private message content in the proxy layer
+
+### 📋 Usage
+- **Private Messages**: `/msg <player> <message>` - Send private message to any player on the network
+- **Aliases**: `/tell <player> <message>` and `/whisper <player> <message>` work the same way
+- **Reply**: `/reply <message>` or `/r <message>` to respond to the last person who messaged you
+- **Permissions**: Requires `skyenetv.msg` permission to use private messaging
+
+### 🎯 Benefits
+- **Cross-Server Communication**: Message any player regardless of which server they're on
+- **Privacy**: No logging of private message content
+- **User Friendly**: Smart player lookup with partial name matching
+- **Reply System**: Easy reply functionality for ongoing conversations
+
+## Version 3.2.5 (July 3, 2025) - FLY COMMAND USER EXPERIENCE IMPROVEMENT
+
+### 🔧 Command Improvements
+- **Improved Fly Command Messaging**: Updated `/skyenetv:fly` command messages for clarity and accuracy
+- **Transparent Communication**: Command now clearly indicates it's sending a request to the backend server
+- **Backend Handler Notice**: Added informative messages about requiring the SkyeNetV backend handler
+- **Honest Feedback**: Removed misleading "Flight enabled/disabled!" messages that didn't reflect actual server state
+
+### 🔧 Technical Changes
+- **Updated FlyCommand.java**: Modified response messages to be more accurate about what the proxy does
+- **Backend Dependency Clarity**: Messages now explain that actual flight toggling requires backend handler installation
+- **User Experience**: Prevents confusion when backend handlers are not installed or configured
+
+### 📋 User Experience
+- **Clear Expectations**: Users now understand the command sends a request rather than directly enabling flight
+- **Installation Guidance**: Messages guide administrators to install the backend handler if needed
+- **Transparency**: Command behavior is now accurately communicated to users
+
+## Version 3.2.4 (July 3, 2025) - NAMESPACED FLY COMMAND
+
+### 🔧 Command Improvements
+- **Updated Fly Command Registration**: Changed `/fly` to `/skyenetv:fly` for better plugin compatibility
+- **Conflict Prevention**: Allows testing and coexistence with other plugins that provide `/fly` commands
+- **Maintained Functionality**: All existing fly command features preserved (permissions, cross-server functionality, etc.)
+
+### 🔧 Technical Changes
+- **Modified Command Registration**: Updated `SkyeNetV.java` to register `skyenetv:fly` instead of `fly`
+- **Backward Compatibility**: Players can still use the full namespaced command to access SkyeNetV's fly functionality
+- **Plugin Coexistence**: Enables server administrators to test and compare different fly implementations
+
+### 📋 Usage
+- **New Command**: `/skyenetv:fly [player] [on|off]` - All previous syntax options still work
+- **Permissions**: Same permissions apply - `skyenetv.fly` and `skyenetv.fly.others`
+- **Cross-Server**: Maintains full network-wide functionality across all backend servers
+
+### 🎯 Benefits
+- **Plugin Testing**: Administrators can now test if other plugins provide `/fly` commands
+- **Namespace Clarity**: Clear distinction between SkyeNetV's fly command and other implementations
+- **Configuration Flexibility**: Allows for plugin priority configuration and testing scenarios
+
 ## Version 3.2.1 (July 21, 2025) - ADMINISTRATION IMPROVEMENTS
 
 ### 🔧 Features and Improvements

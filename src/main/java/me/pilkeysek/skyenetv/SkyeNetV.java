@@ -15,7 +15,8 @@ import me.pilkeysek.skyenetv.commands.RulesCommand;
 import me.pilkeysek.skyenetv.commands.SkyeNetVCommand;
 import me.pilkeysek.skyenetv.commands.SudoCommand;
 import me.pilkeysek.skyenetv.commands.DiscordCommand;
-import me.pilkeysek.skyenetv.commands.FlyCommand;
+import me.pilkeysek.skyenetv.commands.PrivateMessageCommand;
+import me.pilkeysek.skyenetv.commands.ReplyCommand;
 import me.pilkeysek.skyenetv.utils.PrefixUtils;
 import me.pilkeysek.skyenetv.utils.ChatManager;
 import me.pilkeysek.skyenetv.discord.DiscordManager;
@@ -26,9 +27,10 @@ import org.slf4j.Logger;
 import com.velocitypowered.api.proxy.ProxyServer;
 
 import java.nio.file.Path;
+import me.pilkeysek.skyenetv.api.SkyeNetVProvider;
 
 @Plugin(id = "skyenetv", name = "SkyeNet Velocity Plugin", version = "3.2.1",
-        url = "skyemc.net", description = "Core utilities for SkyeNet Velocity ProxyServer with Discord and Local Chat", authors = {"NobleSke", "PilkeySEK"})
+        url = "https://skyemc.net", description = "Core utilities for SkyeNet Velocity ProxyServer with Discord integration and Local Chat", authors = {"NobleSKye", "PilkeySEK", "SkyeNetwork Team"})
 public class SkyeNetV {
 
     private final ProxyServer server;
@@ -81,13 +83,20 @@ public class SkyeNetV {
         commandManager.register(commandManager.metaBuilder("lobby").aliases("l", "hub").plugin(this).build(), new LobbyCommand(server, config));
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
         commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
-        commandManager.register(commandManager.metaBuilder("fly").plugin(this).build(), new FlyCommand(server));
-        
+
+        // Register private messaging commands for cross-server communication
+        PrivateMessageCommand privateMessageCommand = new PrivateMessageCommand(config, server);
+        commandManager.register(commandManager.metaBuilder("msg").aliases("tell", "whisper").plugin(this).build(), privateMessageCommand);
+        commandManager.register(commandManager.metaBuilder("reply").aliases("r").plugin(this).build(), new ReplyCommand(privateMessageCommand));
+
         // Register the main plugin command with reload functionality
         commandManager.register(commandManager.metaBuilder("skyenetv").aliases("snv").plugin(this).build(), new SkyeNetVCommand(this, config, discordManager));
         
         // Register Discord command
         commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand(config));
+
+        // Initialize SkyeNetV API for other plugins
+        SkyeNetVProvider.initialize(server);
 
         // Initialize LuckPerms integration
         PrefixUtils.initialize();
