@@ -5,17 +5,20 @@ import com.velocitypowered.api.command.SimpleCommand;
 import me.pilkeysek.skyenetv.SkyeNetV;
 import me.pilkeysek.skyenetv.config.Config;
 import me.pilkeysek.skyenetv.discord.DiscordManager;
+import me.pilkeysek.skyenetv.config.ServerGroupsRegistry;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 public class SkyeNetVCommand implements SimpleCommand {
 
     private final Config config;
     private final DiscordManager discordManager;
+    private final ServerGroupsRegistry serverGroupsRegistry;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
-    public SkyeNetVCommand(SkyeNetV plugin, Config config, DiscordManager discordManager) {
+    public SkyeNetVCommand(SkyeNetV plugin, Config config, DiscordManager discordManager, ServerGroupsRegistry serverGroupsRegistry) {
         this.config = config;
         this.discordManager = discordManager;
+        this.serverGroupsRegistry = serverGroupsRegistry;
     }
 
     @Override
@@ -51,18 +54,29 @@ public class SkyeNetVCommand implements SimpleCommand {
         }
         
         // Reload the configuration
-        boolean success = config.reload();
-        
-        if (success) {
+        boolean configSuccess = config.reload();
+        boolean groupsSuccess = true;
+
+        // Reload server groups if available
+        if (serverGroupsRegistry != null) {
+            groupsSuccess = serverGroupsRegistry.reload();
+        }
+
+        if (configSuccess) {
             // Reinitialize Discord connection with new config
             if (discordManager != null) {
                 discordManager.shutdown();
                 discordManager.initialize();
             }
-            
-            // Get reload success message from config or use default if not found
+        }
+
+        if (configSuccess && groupsSuccess) {
             String reloadSuccess = config.getString("messages.reload_success", "<green>✅ SkyeNetV configuration reloaded successfully!</green>");
             source.sendMessage(miniMessage.deserialize(reloadSuccess));
+        } else if (configSuccess) {
+            // Config reloaded but server groups reload failed
+            String partial = config.getString("messages.reload_partial", "<yellow>⚠️ Configuration reloaded, but server_groups.yml failed to reload. Check console.</yellow>");
+            source.sendMessage(miniMessage.deserialize(partial));
         } else {
             String reloadFailure = config.getString("messages.reload_failure", "<red>❌ Failed to reload configuration. Check console for errors.</red>");
             source.sendMessage(miniMessage.deserialize(reloadFailure));

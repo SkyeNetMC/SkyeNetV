@@ -1,0 +1,69 @@
+
+# Server groups configuration (canonical example)
+#
+# This file defines named groups (top-level keys). Each group controls
+# cross-server delivery and join/leave message behavior for the listed servers.
+# Valid placeholders in messages: %player% and %server%
+#
+# Supported fields per group:
+#   servers:   [list]       -> List of server ids this group controls (required)
+#   chat:      global|local -> 'global' forwards chat to other servers in the group;
+#                                 'local' keeps chat on the origin server only.
+#   events:    custom|vanilla -> 'custom' means this plugin will send join/leave messages;
+#                                  'vanilla' means the server/plugin handles join/leave messages.
+#   join:
+#     message: "..."        -> MiniMessage-formatted join message sent to all servers in the group
+#   leave:
+#     message: "..."        -> MiniMessage-formatted leave message sent to all servers in the group
+#   senders:   [list]        -> Optional: virtual senders (e.g., DISCORD) that should be
+#                                 delivered to the servers in this group.
+#
+# Notes:
+# - Servers may appear in multiple groups; when they do, delivery uses OR semantics
+#   (if any group permits delivery the message will be sent).
+# - If a virtual sender (e.g. DISCORD) is listed in 'senders' for a group, messages
+#   from that sender will only deliver to servers listed in that group.
+
+global:
+  # Servers that belong to this group
+  servers: [lobby, hub]
+  # Chat forwarded between all servers in this group
+  chat: global
+  # Use custom join/leave messages controlled by this plugin
+  events: custom
+  join:
+    message: "<gray>[<green>+<gray>] %player%"
+  leave:
+    message: "<gray>[<red>-<gray>] %player%"
+
+minigames:
+  servers: [bedwars, skyeblock, spleef]
+  chat: global
+  events: custom
+  join:
+    message: "<gray>[<green>+<gray>] %player%"
+  leave:
+    message: "<gray>[<red>-<gray>] %player%"
+
+local:
+  servers: [minigames, pvp]
+  # Keep chat local to the server where it originated
+  chat: local
+  # Let the server or another plugin handle join/leave (vanilla behavior)
+  events: vanilla
+  # You can still provide a custom join/leave message if preferred (uncomment below)
+  #join:
+  #  message: "<gray>[<green>+<gray>] %player%"
+  #leave:
+  #  message: "<gray>[<red>-<gray>] %player%"
+
+# Example: a group that receives messages from a virtual sender like Discord
+#discord-relay:
+#  servers: [lobby, hub]
+#  chat: global
+#  senders: [DISCORD]
+  # Whether servers in this group forward to Discord. Defaults to true if omitted.
+  # Set to false to block Discord forwarding for these servers.
+#  discord: true
+
+

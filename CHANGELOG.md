@@ -1,4 +1,17 @@
 # Changelog
+## Version 3.2.3 (Nov 30, 2025) - Group Discord Toggle & Safety
+
+### ✅ Highlights
+- **Per-group Discord toggle:** Added `discord: true|false` to `server_groups.yml` so server groups can opt in/out of forwarding server messages to Discord.
+- **Clearer `senders` semantics:** `senders` lists virtual sources (e.g. `DISCORD`) that deliver into the servers in a group; separate from the new `discord` flag which controls forwarding out to Discord.
+- **Respect chat cancellation:** Discord forwarding now only occurs if the chat event is ultimately allowed (if another plugin cancels the chat, it will not be forwarded to Discord).
+- **Registry & tests:** `ServerGroupsRegistry` now parses `discord` and exposes `shouldSendServerToDiscord(...)`; unit tests added for registry and reloading.
+- **Version bump:** Project and generated config header updated to `3.2.3`.
+
+### 🛠️ Notes
+- Default behavior remains backwards-compatible: servers not listed in any group still forward to Discord if the global Discord option is enabled.
+- When a server belongs to multiple groups, the plugin uses OR semantics for the `discord` flag (any group allowing Discord enables forwarding). Tell us if you prefer AND semantics.
+
 
 ## Version 3.2.1 (July 21, 2025) - ADMINISTRATION IMPROVEMENTS
 

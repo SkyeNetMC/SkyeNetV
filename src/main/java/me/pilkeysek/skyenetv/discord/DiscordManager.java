@@ -2,6 +2,7 @@ package me.pilkeysek.skyenetv.discord;
 
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.pilkeysek.skyenetv.config.DiscordConfig;
+import me.pilkeysek.skyenetv.config.ServerGroupsRegistry;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -15,15 +16,17 @@ public class DiscordManager {
     private final ProxyServer server;
     private final Logger logger;
     private final DiscordConfig config;
+    private final ServerGroupsRegistry serverGroupsRegistry;
     private JDA jda;
     private TextChannel chatChannel;
     private DiscordListener discordListener;
     private boolean connected = false;
     
-    public DiscordManager(ProxyServer server, Logger logger, DiscordConfig config) {
+    public DiscordManager(ProxyServer server, Logger logger, DiscordConfig config, ServerGroupsRegistry serverGroupsRegistry) {
         this.server = server;
         this.logger = logger;
         this.config = config;
+        this.serverGroupsRegistry = serverGroupsRegistry;
     }
     
     public CompletableFuture<Boolean> initialize() {
@@ -59,7 +62,7 @@ public class DiscordManager {
                     
                     // Add Discord listener if discord-to-game is enabled
                     if (config.isDiscordToGameEnabled()) {
-                        discordListener = new DiscordListener(server, logger, channelId);
+                        discordListener = new DiscordListener(server, logger, channelId, serverGroupsRegistry);
                         jda.addEventListener(discordListener);
                         logger.info("Discord-to-game messaging enabled");
                     }

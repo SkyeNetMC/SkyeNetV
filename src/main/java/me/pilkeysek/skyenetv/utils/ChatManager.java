@@ -3,6 +3,8 @@ package me.pilkeysek.skyenetv.utils;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.pilkeysek.skyenetv.config.Config;
+import me.pilkeysek.skyenetv.config.MessageType;
+import me.pilkeysek.skyenetv.config.ServerGroupsRegistry;
 import me.pilkeysek.skyenetv.discord.DiscordManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -14,13 +16,15 @@ public class ChatManager {
     private final Logger logger;
     private final DiscordManager discordManager;
     private final Config config;
+    private final ServerGroupsRegistry serverGroupsRegistry;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
     
-    public ChatManager(ProxyServer server, Logger logger, DiscordManager discordManager, Config config) {
+    public ChatManager(ProxyServer server, Logger logger, DiscordManager discordManager, Config config, ServerGroupsRegistry serverGroupsRegistry) {
         this.server = server;
         this.logger = logger;
         this.discordManager = discordManager;
         this.config = config;
+        this.serverGroupsRegistry = serverGroupsRegistry;
     }
     
     /**
@@ -76,16 +80,20 @@ public class ChatManager {
             if (recipientServerName.equals(senderServerName)) {
                 continue; // Skip - let backend server handle local chat
             }
-            
-            // Send to players on different servers only
-            recipient.sendMessage(chatComponent);
+            // Check server-groups registry to see if we should deliver
+            try {
+                if (serverGroupsRegistry == null || serverGroupsRegistry.shouldDeliver(senderServerName, recipientServerName, MessageType.CHAT)) {
+                    recipient.sendMessage(chatComponent);
+                }
+            } catch (Exception e) {
+                // Fallback to sending in case of registry errors
+                logger.warn("Error evaluating server group delivery rule, delivering by default", e);
+                recipient.sendMessage(chatComponent);
+            }
         }
         
         // Log the message
         logger.info("[Global Chat] {} (from {}): {}", player.getUsername(), senderServerName, message);
-        
-        // Send to Discord if configured
-        sendMessageToDiscord(player, message);
         
         } catch (Exception e) {
             logger.error("Error processing player message for {}: {}", player.getUsername(), e.getMessage(), e);
@@ -106,8 +114,17 @@ public class ChatManager {
                     .replace("{suffix}", PrefixUtils.getSuffixString(sender))
                     .replace("{message}", message);
 
-            if (config.isSendAllMessagesToDiscord()) {
-                discordManager.sendToDiscord(discordMessage);
+            try {
+                boolean global = config.isSendAllMessagesToDiscord();
+                boolean groupAllows = true;
+                if (serverGroupsRegistry != null) {
+                    groupAllows = serverGroupsRegistry.shouldSendServerToDiscord(serverName);
+                }
+                if (global && groupAllows) {
+                    discordManager.sendToDiscord(discordMessage);
+                }
+            } catch (Exception e) {
+                logger.warn("Error while evaluating discord forwarding rules, skipping Discord send", e);
             }
         }
     }

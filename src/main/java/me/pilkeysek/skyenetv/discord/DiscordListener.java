@@ -1,6 +1,7 @@
 package me.pilkeysek.skyenetv.discord;
 
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.Player;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -10,17 +11,21 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.slf4j.Logger;
+import me.pilkeysek.skyenetv.config.ServerGroupsRegistry;
+import me.pilkeysek.skyenetv.config.MessageType;
 
 public class DiscordListener extends ListenerAdapter {
     
     private final ProxyServer server;
     private final Logger logger;
     private final String chatChannelId;
+    private final ServerGroupsRegistry serverGroupsRegistry;
     
-    public DiscordListener(ProxyServer server, Logger logger, String chatChannelId) {
+    public DiscordListener(ProxyServer server, Logger logger, String chatChannelId, ServerGroupsRegistry serverGroupsRegistry) {
         this.server = server;
         this.logger = logger;
         this.chatChannelId = chatChannelId;
+        this.serverGroupsRegistry = serverGroupsRegistry;
     }
     
     @Override
@@ -56,8 +61,17 @@ public class DiscordListener extends ListenerAdapter {
                 .append(Component.text(content, NamedTextColor.GRAY))
                 .build();
         
-        // Send to all online players
-        server.getAllPlayers().forEach(player -> player.sendMessage(discordMessage));
+        // Send to all online players, filtered by server-groups rules (sender = DISCORD)
+        for (Player player : server.getAllPlayers()) {
+            try {
+                String recipientServerName = player.getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("");
+                if (serverGroupsRegistry == null || serverGroupsRegistry.shouldDeliver("DISCORD", recipientServerName, MessageType.DISCORD)) {
+                    player.sendMessage(discordMessage);
+                }
+            } catch (Exception e) {
+                player.sendMessage(discordMessage);
+            }
+        }
         
         logger.info("[Discord -> Game] {}: {}", displayName, content);
     }

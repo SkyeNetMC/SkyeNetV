@@ -10,6 +10,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import me.pilkeysek.skyenetv.config.RulesConfig;
 import me.pilkeysek.skyenetv.config.DiscordConfig;
 import me.pilkeysek.skyenetv.config.Config;
+import me.pilkeysek.skyenetv.config.ServerGroupsRegistry;
 import me.pilkeysek.skyenetv.commands.LobbyCommand;
 import me.pilkeysek.skyenetv.commands.RulesCommand;
 import me.pilkeysek.skyenetv.commands.SkyeNetVCommand;
@@ -40,6 +41,7 @@ public class SkyeNetV {
     private ChatManager chatManager;
     private ChatListener chatListener;
     private JoinLeaveListener joinLeaveListener;
+    private ServerGroupsRegistry serverGroupsRegistry;
 
     @Inject
     public SkyeNetV(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
@@ -56,18 +58,20 @@ public class SkyeNetV {
         config = new Config(dataDirectory, logger);
         rulesConfig = new RulesConfig(dataDirectory, logger);
         discordConfig = new DiscordConfig(config, logger);
+        // Initialize server-groups registry (advanced delivery rules)
+        serverGroupsRegistry = new ServerGroupsRegistry(dataDirectory, logger);
         
         // Initialize Discord manager
-        discordManager = new DiscordManager(server, logger, discordConfig);
+        discordManager = new DiscordManager(server, logger, discordConfig, serverGroupsRegistry);
         
         // Initialize chat manager
-        chatManager = new ChatManager(server, logger, discordManager, config);
+        chatManager = new ChatManager(server, logger, discordManager, config, serverGroupsRegistry);
         
         // Initialize chat listener
         chatListener = new ChatListener(chatManager, logger);
         
         // Initialize join/leave listener
-        joinLeaveListener = new JoinLeaveListener(server, logger, chatManager, discordManager, config);
+        joinLeaveListener = new JoinLeaveListener(server, logger, chatManager, discordManager, config, serverGroupsRegistry);
 
         logger.info("SkyeNetV initialized!");
     }
@@ -82,7 +86,7 @@ public class SkyeNetV {
         commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
         
         // Register the main plugin command with reload functionality
-        commandManager.register(commandManager.metaBuilder("skyenetv").aliases("snv").plugin(this).build(), new SkyeNetVCommand(this, config, discordManager));
+        commandManager.register(commandManager.metaBuilder("skyenetv").aliases("snv").plugin(this).build(), new SkyeNetVCommand(this, config, discordManager, serverGroupsRegistry));
         
         // Register Discord command
         commandManager.register(commandManager.metaBuilder("discord").plugin(this).build(), new DiscordCommand(config));

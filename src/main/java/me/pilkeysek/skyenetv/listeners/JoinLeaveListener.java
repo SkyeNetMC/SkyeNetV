@@ -9,6 +9,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import me.pilkeysek.skyenetv.config.Config;
 import me.pilkeysek.skyenetv.discord.DiscordManager;
 import me.pilkeysek.skyenetv.utils.ChatManager;
+import me.pilkeysek.skyenetv.config.MessageType;
+import me.pilkeysek.skyenetv.config.ServerGroupsRegistry;
 import me.pilkeysek.skyenetv.utils.PrefixUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -21,15 +23,17 @@ public class JoinLeaveListener {
     private final ChatManager chatManager;
     private final DiscordManager discordManager;
     private final Config config;
+    private final ServerGroupsRegistry serverGroupsRegistry;
     private final MiniMessage miniMessage;
     
-    public JoinLeaveListener(ProxyServer server, Logger logger, ChatManager chatManager, DiscordManager discordManager, Config config) {
+    public JoinLeaveListener(ProxyServer server, Logger logger, ChatManager chatManager, DiscordManager discordManager, Config config, ServerGroupsRegistry serverGroupsRegistry) {
         this.server = server;
         this.logger = logger;
         this.chatManager = chatManager;
         this.discordManager = discordManager;
         this.config = config;
         this.miniMessage = MiniMessage.miniMessage();
+        this.serverGroupsRegistry = serverGroupsRegistry;
     }
     
     @Subscribe(order = PostOrder.LAST)
@@ -39,18 +43,42 @@ public class JoinLeaveListener {
         }
         
         Player player = event.getPlayer();
-        
-        // Create custom join message with enhanced color formatting
-        Component joinMessage = createCustomJoinMessage(player);
-        
-        // Broadcast to all players (this effectively replaces the vanilla message)
-        for (Player onlinePlayer : server.getAllPlayers()) {
-            onlinePlayer.sendMessage(joinMessage); // Pass Component directly
+        String senderServerName = player.getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("");
+
+        // Only broadcast plugin custom messages if group/config indicates custom events are handled
+        boolean shouldHandle = serverGroupsRegistry == null || serverGroupsRegistry.shouldHandleEvent(senderServerName, MessageType.JOIN);
+
+        Component joinMessage = null;
+        if (shouldHandle) {
+            // Prefer group-specific join message if present
+            String format = serverGroupsRegistry != null ? serverGroupsRegistry.getJoinMessageForServer(senderServerName).orElse(config.getJoinMessage()) : config.getJoinMessage();
+            String prefix = PrefixUtils.getPrefixString(player);
+            String suffix = PrefixUtils.getSuffixString(player);
+            String formattedMessage = format
+                    .replace("{player}", player.getUsername())
+                    .replace("{prefix}", prefix)
+                    .replace("{suffix}", suffix)
+                    .replace("%player%", player.getUsername())
+                    .replace("%server%", senderServerName);
+            joinMessage = miniMessage.deserialize(formattedMessage);
+
+            for (Player onlinePlayer : server.getAllPlayers()) {
+                try {
+                    String recipientServerName = onlinePlayer.getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("");
+                    if (serverGroupsRegistry == null || serverGroupsRegistry.shouldDeliver(senderServerName, recipientServerName, MessageType.JOIN)) {
+                        onlinePlayer.sendMessage(joinMessage);
+                    }
+                } catch (Exception e) {
+                    onlinePlayer.sendMessage(joinMessage);
+                }
+            }
+            logger.info("{} joined the network with custom message", player.getUsername());
+        } else {
+            logger.debug("Skipping plugin join broadcast for {} (vanilla/event handled elsewhere)", player.getUsername());
         }
 
-        sendJoinMessageToDiscord(player.getUsername());
-        
-        logger.info("{} joined the network with custom message", player.getUsername());
+        // Send join to Discord independently if enabled (respecting group discord flag)
+        sendJoinMessageToDiscord(player.getUsername(), senderServerName);
     }
     
     @Subscribe(order = PostOrder.LAST)
@@ -60,25 +88,45 @@ public class JoinLeaveListener {
         }
         
         Player player = event.getPlayer();
-        
-        // Create custom leave message with enhanced color formatting
-        Component leaveMessage = createCustomLeaveMessage(player);
-        
-        // Broadcast to all remaining players
-        for (Player onlinePlayer : server.getAllPlayers()) {
-            if (!onlinePlayer.equals(player)) {
-                onlinePlayer.sendMessage(leaveMessage); // Pass Component directly
+        String senderServerName = player.getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("");
+
+        boolean shouldHandle = serverGroupsRegistry == null || serverGroupsRegistry.shouldHandleEvent(senderServerName, MessageType.LEAVE);
+
+        if (shouldHandle) {
+            String format = serverGroupsRegistry != null ? serverGroupsRegistry.getLeaveMessageForServer(senderServerName).orElse(config.getLeaveMessage()) : config.getLeaveMessage();
+            String prefix = PrefixUtils.getPrefixString(player);
+            String suffix = PrefixUtils.getSuffixString(player);
+            String formattedMessage = format
+                    .replace("{player}", player.getUsername())
+                    .replace("{prefix}", prefix)
+                    .replace("{suffix}", suffix)
+                    .replace("%player%", player.getUsername())
+                    .replace("%server%", senderServerName);
+            Component leaveMessage = miniMessage.deserialize(formattedMessage);
+
+            for (Player onlinePlayer : server.getAllPlayers()) {
+                if (!onlinePlayer.equals(player)) {
+                    try {
+                        String recipientServerName = onlinePlayer.getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("");
+                        if (serverGroupsRegistry == null || serverGroupsRegistry.shouldDeliver(senderServerName, recipientServerName, MessageType.LEAVE)) {
+                            onlinePlayer.sendMessage(leaveMessage);
+                        }
+                    } catch (Exception e) {
+                        onlinePlayer.sendMessage(leaveMessage);
+                    }
+                }
             }
+            logger.info("{} left the network with custom message", player.getUsername());
+        } else {
+            logger.debug("Skipping plugin leave broadcast for {} (vanilla/event handled elsewhere)", player.getUsername());
         }
 
-        sendLeaveMessageToDiscord(player.getUsername());
-        
+        sendLeaveMessageToDiscord(player.getUsername(), senderServerName);
+
         // Clean up any player data
         if (chatManager != null) {
             chatManager.removePlayer(player);
         }
-        
-        logger.info("{} left the network with custom message", player.getUsername());
     }
     
     private Component createCustomJoinMessage(Player player) {
@@ -127,28 +175,40 @@ public class JoinLeaveListener {
         return message;
     }
 
-    public void sendJoinMessageToDiscord(String playerName) {
+    public void sendJoinMessageToDiscord(String playerName, String senderServerName) {
         if (discordManager != null && discordManager.isConnected()) {
             String discordFormat = config.getGameToDiscordJoinFormat();
 
             String discordMessage = discordFormat
-                    .replace("{player}", playerName);
+                    .replace("{player}", playerName)
+                    .replace("{server}", senderServerName == null ? "" : senderServerName);
 
-            if (config.isSendAllMessagesToDiscord()) {
-                discordManager.sendToDiscord(discordMessage);
+            try {
+                boolean global = config.isSendAllMessagesToDiscord();
+                boolean groupAllows = true;
+                if (serverGroupsRegistry != null) groupAllows = serverGroupsRegistry.shouldSendServerToDiscord(senderServerName);
+                if (global && groupAllows) discordManager.sendToDiscord(discordMessage);
+            } catch (Exception e) {
+                logger.warn("Error while evaluating discord forwarding rules for join message", e);
             }
         }
     }
 
-    public void sendLeaveMessageToDiscord(String playerName) {
+    public void sendLeaveMessageToDiscord(String playerName, String senderServerName) {
         if (discordManager != null && discordManager.isConnected()) {
             String discordFormat = config.getGameToDiscordLeaveFormat();
 
             String discordMessage = discordFormat
-                    .replace("{player}", playerName);
+                    .replace("{player}", playerName)
+                    .replace("{server}", senderServerName == null ? "" : senderServerName);
 
-            if (config.isSendAllMessagesToDiscord()) {
-                discordManager.sendToDiscord(discordMessage);
+            try {
+                boolean global = config.isSendAllMessagesToDiscord();
+                boolean groupAllows = true;
+                if (serverGroupsRegistry != null) groupAllows = serverGroupsRegistry.shouldSendServerToDiscord(senderServerName);
+                if (global && groupAllows) discordManager.sendToDiscord(discordMessage);
+            } catch (Exception e) {
+                logger.warn("Error while evaluating discord forwarding rules for leave message", e);
             }
         }
     }
