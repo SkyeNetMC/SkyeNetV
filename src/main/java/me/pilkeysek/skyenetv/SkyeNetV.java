@@ -12,6 +12,7 @@ import me.pilkeysek.skyenetv.config.DiscordConfig;
 import me.pilkeysek.skyenetv.config.Config;
 import me.pilkeysek.skyenetv.config.ServerGroupsRegistry;
 import me.pilkeysek.skyenetv.commands.LobbyCommand;
+import me.pilkeysek.skyenetv.commands.HubCommand;
 import me.pilkeysek.skyenetv.commands.RulesCommand;
 import me.pilkeysek.skyenetv.commands.SkyeNetVCommand;
 import me.pilkeysek.skyenetv.commands.SudoCommand;
@@ -81,7 +82,8 @@ public class SkyeNetV {
         CommandManager commandManager = server.getCommandManager();
         
         // Register core commands
-        commandManager.register(commandManager.metaBuilder("lobby").aliases("l", "hub").plugin(this).build(), new LobbyCommand(server, config));
+        commandManager.register(commandManager.metaBuilder("lobby").aliases("l").plugin(this).build(), new LobbyCommand(server, config));
+        commandManager.register(commandManager.metaBuilder("hub").plugin(this).build(), new HubCommand(server, config));
         commandManager.register(commandManager.metaBuilder("sudo").plugin(this).build(), new SudoCommand(server, logger));
         commandManager.register(commandManager.metaBuilder("rules").plugin(this).build(), new RulesCommand(rulesConfig));
         
